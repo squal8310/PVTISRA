@@ -1,0 +1,471 @@
+/* General Body Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Metro UI font */
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0; /* Light grey background */
+    color: #333;
+    display: flex;
+    height: 100vh;
+    overflow: hidden; /* Prevent main scrollbar */
+}
+
+.container {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: #2d2d30; /* Dark background for sidebar */
+    color: #fff;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    overflow-y: auto; /* Enable scrolling for long menus */
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 20px;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 300; /* Lighter font weight for Metro feel */
+    color: #00aba9; /* Accent color */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav .nav-item {
+    display: block;
+    padding: 12px 20px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-nav .nav-item:hover,
+.sidebar-nav .nav-item.active {
+    background-color: #00aba9; /* Accent color on hover/active */
+    color: #fff;
+}
+
+.sidebar-nav .nav-category {
+    color: #888;
+    font-size: 14px;
+    padding: 15px 20px 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-top: 1px solid #3a3a3d;
+    margin-top: 15px;
+}
+
+.sidebar-nav .nav-category:first-of-type {
+    border-top: none;
+    margin-top: 0;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex-grow: 1; /* Allow main content to take remaining space */
+    padding: 20px;
+    background-color: #fff; /* White background for content */
+    overflow-y: auto; /* Enable scrolling for main content */
+}
+
+.main-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 300;
+    color: #00aba9; /* Accent color for main title */
+}
+
+.content-area {
+    padding: 10px 0;
+}
+
+/* Form Styles */
+.product-form { /* Apply to product form */
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    max-width: 600px; /* Keep product form at 600px */
+    margin-top: 20px;
+}
+
+.purchase-form { /* Apply to purchase form */
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    max-width: 900px; /* Increased max-width for purchase form */
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="datetime-local"], /* Added for purchase form */
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group select {
+    height: 40px; /* Adjust height for consistency */
+}
+
+.btn-primary {
+    background-color: #00aba9;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #008c8a;
+}
+
+.btn-secondary { /* Added for purchase form's "Add Product" button */
+    background-color: #555;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    display: inline-block; /* To allow padding and margin */
+    margin-top: 10px;
+}
+
+.btn-secondary:hover {
+    background-color: #333;
+}
+
+.btn-secondary[disabled],
+.btn-secondary:disabled {
+    background-color: #cccccc; /* Lighter grey for disabled state */
+    color: #666666; /* Darker text for disabled state */
+    cursor: not-allowed; /* Indicate it's not clickable */
+    opacity: 0.7; /* Slightly transparent */
+}
+
+.btn-remove-product { /* Added for dynamically added product rows */
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.btn-remove-product:hover {
+    background-color: #c0392b;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Purchase Options Layout (for purchase_new.html) */
+.purchase-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.option-card {
+    background-color: #f9f9f9;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+}
+
+.option-card h2 {
+    color: #00aba9;
+    font-size: 24px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.option-card p {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.btn-secondary.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Purchase Form Specific Styles */
+.purchase-form h2 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #00aba9;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.product-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.product-row .form-group {
+    flex: 1;
+    margin-bottom: 0; /* Override default form-group margin */
+}
+
+.product-row .form-group label {
+    font-size: 14px;
+    color: #777;
+}
+
+.total-section {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    text-align: right;
+}
+
+.total-section label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00aba9;
+    margin-right: 10px;
+}
+
+.total-section input {
+    width: 150px;
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00aba9;
+    border: none;
+    background-color: transparent;
+}
+
+/* Autocomplete Suggestions */
+.product-autocomplete-group {
+    position: relative; /* For positioning suggestions */
+}
+
+.product-suggestions {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000; /* Ensure it's above other elements */
+    width: calc(100% - 2px); /* Match input width */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    top: 100%; /* Position below the input */
+    left: 0;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+.no-suggestions {
+    padding: 10px;
+    color: #888;
+    font-style: italic;
+}
+
+.btn-add-new-product {
+    margin-left: 10px;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1001; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 900px; /* Reverted max-width to 900px */
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Adjust product-form inside modal */
+.modal-content .product-form {
+    max-width: none; /* Remove max-width constraint for modal form */
+    box-shadow: none; /* Remove shadow for modal form */
+    background-color: transparent; /* Transparent background for modal form */
+    padding: 0;
+    margin-top: 0;
+}
+
+/* Product Search Area */
+.product-search-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto; /* Name input, Barcode input, Button */
+    gap: 15px;
+    align-items: end;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f0f8ff; /* Light blue background */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.main-product-search, .main-barcode-search {
+    flex-grow: 1;
+}
+
+.product-search-area .product-name-input,
+.product-search-area .barcode-input {
+    font-size: 18px;
+    padding: 12px;
+}
+
+.product-search-area .btn-add-new-product {
+    margin-top: 0; /* Override default margin */
+    height: 45px; /* Match input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adjust product-row display for added products */
+#purchase-details-rows .product-row {
+    background-color: #fefefe;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    align-items: center;
+}
+
+#purchase-details-rows .product-row .form-group {
+    margin-bottom: 0;
+}
+
+#purchase-details-rows .product-row .form-group input[type="text"][readonly] {
+    background-color: #e9ecef;
+    cursor: default;
+}
