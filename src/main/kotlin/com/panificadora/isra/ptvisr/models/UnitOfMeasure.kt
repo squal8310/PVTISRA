@@ -1,0 +1,12 @@
+package com.panificadora.isra.ptvisr.models
+
+import jakarta.persistence.*
+
+@Entity
+@Table(name = "units_of_measure")
+data class UnitOfMeasure(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Int = 0,
+    val name: String,
+    val abbreviation: String
+)
