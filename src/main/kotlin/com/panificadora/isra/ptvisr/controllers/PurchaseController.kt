@@ -30,23 +30,23 @@ class PurchaseController(
         model.addAttribute("categories", categoryRepository.findAll())
         model.addAttribute("unitsOfMeasure", unitOfMeasureRepository.findAll())
         model.addAttribute("purchaseFormDto", PurchaseFormDto(purchaseDate = LocalDateTime.now())) // Add DTO for form binding
-        return "purchase_new"
+        return "layout :: mainPage(page='purchase_new', fragment='content')"
     }
 
     @PostMapping("/new")
-    fun savePurchase(@ModelAttribute purchaseFormDto: PurchaseFormDto, redirectAttributes: RedirectAttributes): String {
+    fun savePurchase(@ModelAttribute purchaseFormDto: PurchaseFormDto, model: Model): String {
         // Set purchaseDate to current LocalDateTime in the backend
         purchaseFormDto.purchaseDate = LocalDateTime.now()
         return try {
             purchaseService.savePurchase(purchaseFormDto)
-            redirectAttributes.addFlashAttribute("successMessage", "Compra registrada exitosamente!")
-            "redirect:/purchases/new" // Redirect back to the new purchase page or a list
+            model.addAttribute("successMessage", "Compra registrada exitosamente!");
+            "layout :: mainPage(page='purchase_new', fragment='content')" // Redirect back to the new purchase page or a list
         } catch (e: IllegalArgumentException) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar compra: ${e.message}")
-            "redirect:/purchases/new" // Redirect back to the form with error
+            model.addAttribute("errorMessage", "Error al registrar compra: ${e.message}");
+            "layout :: mainPage(page='purchase_new', fragment='content')" // Redirect back to the form with error
         } catch (e: Exception) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error inesperado al registrar la compra.")
-            "redirect:/purchases/new"
+            model.addAttribute("errorMessage", "Ocurrió un error inesperado al registrar la compra. ${e.message}");
+            "layout :: mainPage(page='purchase_new', fragment='content')"
         }
     }
 }

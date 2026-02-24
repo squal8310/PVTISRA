@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTVISR - Dashboard Test</title>
 </head>
 <body>
-    <h1>Dashboard Test Page</h1>
-    <p th:text="${infoPing}"></p>
-    <p>If you see this, dashboard.html is rendering.</p>
+
+    <div th:fragment="content">
+        <h1>Dashboard Test Page</h1>
+        <p th:text="${infoPing}"></p>
+        <p>If you see this, dashboard.html is rendering.</p>
+    </div>
+
 </body>
 </html>

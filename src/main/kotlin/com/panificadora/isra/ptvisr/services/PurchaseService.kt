@@ -46,11 +46,6 @@ class PurchaseService(
                 price = detailDto.price
             )
             purchaseDetails.add(purchaseDetail)
-
-            // Update product stock
-            product.stock = product.stock + detailDto.quantity
-            productRepository.save(product) // Save updated product stock
-
             calculatedTotal = calculatedTotal + (detailDto.quantity * detailDto.price)
         }
 

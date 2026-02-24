@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @Table(name = "purchases")
 data class Purchase(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Int = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id")

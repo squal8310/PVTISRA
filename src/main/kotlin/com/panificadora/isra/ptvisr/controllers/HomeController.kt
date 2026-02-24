@@ -14,11 +14,22 @@ class HomeController {
         val infoPing = "Bienvenido al sistema POS e Inventario. Fecha: "+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         model.addAttribute("infoPing", infoPing);
         model.addAttribute("pageTitle", "Dashboard"); // Add pageTitle for the layout
-        return "layout";
+        return "layout :: mainPage(page='dashboard', fragment='content')";
     }
 
     @GetMapping("/pos")
     fun pointOfSale(): String {
-        return "point_of_sale"
+        return "layout :: mainPage(page='point_of_sale', fragment='content')"
     }
+
+    @GetMapping("/inventory/products")
+    fun productList(): String {
+        return "layout :: mainPage(page='product_form', fragment='content')"
+    }
+
+    @GetMapping("/purchases/page")
+    fun purchasesNew(): String {
+        return "layout :: mainPage(page='purchase_new', fragment='content')"
+    }
+
 }
