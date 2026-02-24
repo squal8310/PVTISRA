@@ -1,7 +1,6 @@
 package com.panificadora.isra.ptvisr.models
 
 import jakarta.persistence.*
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
@@ -17,8 +16,8 @@ data class Purchase(
     @Column(nullable = false)
     var purchaseDate: LocalDateTime = LocalDateTime.now(),
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    var total: BigDecimal = BigDecimal.ZERO,
+    @Column(nullable = false) // Removed precision and scale
+    var total: Double = 0.0,
 
     @OneToMany(mappedBy = "purchase", cascade = [CascadeType.ALL], orphanRemoval = true)
     val details: MutableList<PurchaseDetail> = mutableListOf()

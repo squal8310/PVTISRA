@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTVISR - Punto de Venta</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .pos-container {
+            display: flex;
+            gap: 20px;
+        }
+        .pos-main {
+            flex: 3;
+        }
+        .pos-sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .sale-summary {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        .summary-total {
+            font-size: 1.8em;
+            font-weight: bold;
+            border-top: 2px solid #ccc;
+            padding-top: 15px;
+            margin-top: auto;
+        }
+        .sale-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .sale-actions .btn {
+            padding: 15px;
+            font-size: 1.2em;
+        }
+        #sale-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #sale-items-table th, #sale-items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #sale-items-table th {
+            background-color: #f2f2f2;
+        }
+        #sale-items-table .quantity-input {
+            width: 60px;
+        }
+        .form-control {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Basic Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more responsive */
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal-footer .btn {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>PTVISR</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="/" class="nav-item">Dashboard</a></li>
+                <li><a href="/pos" class="nav-item active">Punto de Venta</a></li>
+                <li class="nav-category">Inventario</li>
+                <li><a href="/inventory/products" class="nav-item">Productos</a></li>
+                <li><a href="/inventory/movements" class="nav-item">Movimientos</a></li>
+                <li><a href="/inventory/categories" class="nav-item">Categorías</a></li>
+                <li><a href="/inventory/units" class="nav-item">Unidades de Medida</a></li>
+                <li class="nav-category">Compras</li>
+                <li><a href="/purchases/new" class="nav-item">Registrar Compra</a></li>
+                <li><a href="/purchases" class="nav-item">Listado de Compras</a></li>
+                <li><a href="/suppliers" class="nav-item">Proveedores</a></li>
+                <li class="nav-category">Ventas</li>
+                <li><a href="/sales" class="nav-item">Listado de Ventas</a></li>
+                <li><a href="/customers" class="nav-item">Clientes</a></li>
+                <li class="nav-category">Administración</li>
+                <li><a href="/users" class="nav-item">Usuarios</a></li>
+                <li class="nav-category">Reportes</li>
+                <li><a href="/reports" class="nav-item">Ver Reportes</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <header class="main-header">
+            <h1>Punto de Venta</h1>
+        </header>
+        <section class="content-area">
+            <div class="pos-container">
+                <div class="pos-main">
+                    <div class="product-search-area">
+                        <div class="form-group product-autocomplete-group main-product-search">
+                            <label for="posProductNameInput">Buscar Producto:</label>
+                            <input type="text" id="posProductNameInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
+                            <div class="product-suggestions"></div>
+                        </div>
+                    </div>
+                    <table id="sale-items-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Importe</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los productos agregados aparecerán aquí -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pos-sidebar">
+                    <div class="sale-summary">
+                        <div class="summary-item">
+                            <span>Subtotal:</span>
+                            <span id="summary-subtotal">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>IVA (16%):</span>
+                            <span id="summary-iva">$0.00</span>
+                        </div>
+                        <div class="summary-item summary-total">
+                            <span>Total:</span>
+                            <span id="summary-total">$0.00</span>
+                        </div>
+                        <div class="sale-actions">
+                            <button class="btn btn-primary" id="btn-pay">Cobrar</button>
+                            <button class="btn btn-danger" id="btn-cancel">Cancelar Venta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirmar Venta</h2>
+            <span class="close-button" id="closePaymentModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="summary-item">
+                <span>Subtotal:</span>
+                <span id="modal-subtotal">$0.00</span>
+            </div>
+            <!-- IVA comentado según la solicitud del usuario -->
+            <!-- <div class="summary-item">
+                <span>IVA (16%):</span>
+                <span id="modal-iva">$0.00</span>
+            </div> -->
+            <div class="summary-item summary-total">
+                <span>Total a Pagar:</span>
+                <span id="modal-total">$0.00</span>
+            </div>
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="amountReceived">Monto Recibido:</label>
+                <input type="number" id="amountReceived" class="form-control" step="0.01" min="0" value="0.00">
+            </div>
+            <div class="summary-item" style="margin-top: 10px;">
+                <span>Cambio:</span>
+                <span id="modal-change">$0.00</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" id="confirmSaleBtn">Confirmar Venta</button>
+            <button class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/*<![CDATA[*/
+document.addEventListener('DOMContentLoaded', function() {
+    const productNameInput = document.getElementById('posProductNameInput');
+    const productSuggestionsDiv = productNameInput.nextElementSibling;
+    const saleItemsTbody = document.querySelector('#sale-items-table tbody');
+
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const summaryIva = document.getElementById('summary-iva');
+    const summaryTotal = document.getElementById('summary-total');
+    
+    const btnCancel = document.getElementById('btn-cancel');
+    const btnPay = document.getElementById('btn-pay'); // Get the pay button
+
+    // Modal elements
+    const paymentModal = document.getElementById('paymentModal');
+    const closePaymentModal = document.getElementById('closePaymentModal');
+    const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
+    const confirmSaleBtn = document.getElementById('confirmSaleBtn');
+    const modalSubtotal = document.getElementById('modal-subtotal');
+    // const modalIva = document.getElementById('modal-iva'); // Commented out
+    const modalTotal = document.getElementById('modal-total');
+    const amountReceivedInput = document.getElementById('amountReceived');
+    const modalChange = document.getElementById('modal-change');
+
+
+    let saleItems = [];
+
+    function addProductToSale(product) {
+        const existingItem = saleItems.find(item => item.id === product.id);
+
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            saleItems.push({
+                id: product.id,
+                name: product.name,
+                quantity: 1,
+                price: product.price,
+                stock: product.stock
+            });
+        }
+        renderSaleItems();
+        updateSummary();
+    }
+
+    function renderSaleItems() {
+        saleItemsTbody.innerHTML = '';
+        saleItems.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.dataset.index = index;
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.stock}</td>
+                <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" step="1"></td>
+                <td>$${item.price.toFixed(2)}</td>
+                <td>$${(item.quantity * item.price).toFixed(2)}</td>
+                <td><button class="btn btn-remove-item">Eliminar</button></td>
+            `;
+            saleItemsTbody.appendChild(row);
+        });
+    }
+
+    function updateSummary() {
+        const subtotal = saleItems.reduce((acc, item) => acc + (item.quantity * item.price), 0);
+        // const iva = subtotal * 0.16; // IVA commented out as per user request
+        const iva = 0.0; // Set IVA to 0
+        const total = subtotal + iva; // Total is now just subtotal
+
+        summarySubtotal.textContent = `$${subtotal.toFixed(2)}`;
+        // summaryIva.textContent = `$${iva.toFixed(2)}`; // IVA display commented out
+        summaryTotal.textContent = `$${total.toFixed(2)}`;
+    }
+
+    function clearSale() {
+        saleItems = [];
+        renderSaleItems();
+        updateSummary();
+    }
+
+    let debounceTimer;
+    productNameInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const searchTerm = this.value.trim(); // Trim whitespace
+        if (searchTerm.length < 2) { // Minimum length for search
+            productSuggestionsDiv.innerHTML = '';
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/; // EAN-like barcode patterns
+            let url = `/products/search?`;
+            const isBarcodeSearch = eanRegex.test(searchTerm); // Flag to know if it was a barcode search
+
+            if (isBarcodeSearch) {
+                url += `barcode=${searchTerm}`;
+            } else {
+                url += `searchTerm=${searchTerm}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(products => {
+                    productSuggestionsDiv.innerHTML = '';
+                    if (products.length > 0) {
+                        if (isBarcodeSearch) { // If it's a barcode search and at least one product is found, add the first one directly
+                            addProductToSale(products[0]);
+                            productNameInput.value = ''; // Clear input
+                            productSuggestionsDiv.innerHTML = ''; // Clear suggestions
+                            productNameInput.focus(); // Keep focus for next scan
+                        } else {
+                            // Otherwise (name search), display suggestions as usual
+                            products.forEach(product => {
+                                const suggestionItem = document.createElement('div');
+                                suggestionItem.classList.add('suggestion-item');
+                                suggestionItem.textContent = `${product.name} - ${product.price.toFixed(2)}`;
+                                suggestionItem.addEventListener('click', function() {
+                                    addProductToSale(product);
+                                    productNameInput.value = '';
+                                    productSuggestionsDiv.innerHTML = '';
+                                    productNameInput.focus();
+                                });
+                                productSuggestionsDiv.appendChild(suggestionItem);
+                            });
+                        }
+                    } else {
+                        productSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                    productSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar.</div>';
+                });
+        }, 300);
+    });
+    
+    productNameInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            productSuggestionsDiv.innerHTML = '';
+        }, 200);
+    });
+
+    saleItemsTbody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-remove-item')) {
+            const rowIndex = e.target.closest('tr').dataset.index;
+            saleItems.splice(rowIndex, 1);
+            renderSaleItems();
+            updateSummary();
+        }
+    });
+
+    saleItemsTbody.addEventListener('input', function(e) {
+        if (e.target.classList.contains('quantity-input')) {
+            const rowIndex = e.target.closest('tr').dataset.index;
+            const newQuantity = parseInt(e.target.value, 10);
+            if (newQuantity > 0) {
+                saleItems[rowIndex].quantity = newQuantity;
+                renderSaleItems();
+                updateSummary();
+            }
+        }
+    });
+
+    btnCancel.addEventListener('click', function() {
+        if (confirm('¿Está seguro de que desea cancelar la venta actual?')) {
+            clearSale();
+        }
+    });
+
+    // Event listener for the "Cobrar" button (opens modal)
+    btnPay.addEventListener('click', function() {
+        if (saleItems.length === 0) {
+            alert('No hay productos en el carrito para cobrar.');
+            return;
+        }
+
+        const currentSubtotal = parseFloat(summarySubtotal.textContent.replace('$', ''));
+        const currentTotal = parseFloat(summaryTotal.textContent.replace('$', ''));
+
+        modalSubtotal.textContent = `$${currentSubtotal.toFixed(2)}`;
+        // modalIva.textContent = `$${(currentTotal - currentSubtotal).toFixed(2)}`; // IVA commented out
+        modalTotal.textContent = `$${currentTotal.toFixed(2)}`;
+        
+        amountReceivedInput.value = currentTotal.toFixed(2); // Pre-fill with total
+        updateChange(); // Calculate initial change
+
+        paymentModal.style.display = 'block';
+        amountReceivedInput.focus();
+    });
+
+    // Modal close buttons
+    closePaymentModal.addEventListener('click', function() {
+        paymentModal.style.display = 'none';
+    });
+
+    cancelPaymentBtn.addEventListener('click', function() {
+        paymentModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target == paymentModal) {
+            paymentModal.style.display = 'none';
+        }
+    });
+
+    // Calculate change dynamically
+    amountReceivedInput.addEventListener('input', updateChange);
+
+    function updateChange() {
+        const totalToPay = parseFloat(modalTotal.textContent.replace('$', ''));
+        const amountReceived = parseFloat(amountReceivedInput.value) || 0;
+        const change = amountReceived - totalToPay;
+        modalChange.textContent = `$${change.toFixed(2)}`;
+
+        // Optional: Disable confirm button if amount received is less than total
+        if (change < 0) {
+            confirmSaleBtn.disabled = true;
+            modalChange.style.color = 'red';
+        } else {
+            confirmSaleBtn.disabled = false;
+            modalChange.style.color = 'green';
+        }
+    }
+
+    // Confirm Sale button inside modal
+    confirmSaleBtn.addEventListener('click', async function() {
+        const totalToPay = parseFloat(modalTotal.textContent.replace('$', ''));
+        const amountReceived = parseFloat(amountReceivedInput.value) || 0;
+
+        if (amountReceived < totalToPay) {
+            alert('El monto recibido es insuficiente.');
+            return;
+        }
+
+        const saleDetailsDto = saleItems.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            unitPrice: item.price
+        }));
+
+        try {
+            const response = await fetch('/sales', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ details: saleDetailsDto })
+            });
+
+            if (response.ok) {
+                const sale = await response.json();
+                alert(`Venta registrada con éxito! ID de Venta: ${sale.id}`);
+                paymentModal.style.display = 'none'; // Close modal
+                clearSale();
+            } else {
+                const errorData = await response.json();
+                alert(`Error al registrar la venta: ${errorData.message || response.statusText}`);
+                console.error('Error response:', errorData);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+            alert('Error al conectar con el servidor. Intente de nuevo.');
+        }
+    });
+
+});
+/*]]>*/
+</script>
+</body>
+</html>

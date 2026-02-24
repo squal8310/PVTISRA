@@ -22,7 +22,7 @@
                 <li><a href="/inventory/categories" class="nav-item">Categorías</a></li>
                 <li><a href="/inventory/units" class="nav-item">Unidades de Medida</a></li>
                 <li class="nav-category">Compras</li>
-                <li><a href="/purchases/new" class="nav-item">Registrar Compra</a></li>
+                <li><a href="/purchases/new" class="nav-item active">Registrar Compra</a></li>
                 <li><a href="/purchases" class="nav-item">Listado de Compras</a></li>
                 <li><a href="/suppliers" class="nav-item">Proveedores</a></li>
                 <li class="nav-category">Ventas</li>
@@ -37,7 +37,7 @@
     </aside>
     <main class="main-content">
         <header class="main-header">
-            <h1>Registrar Compra</h1> <!-- Specific header for this page -->
+            <h1>Registrar Compra</h1>
         </header>
         <section class="content-area">
             <div th:if="${successMessage}" class="alert alert-success">
@@ -48,8 +48,6 @@
             </div>
 
             <form th:action="@{/purchases/new}" th:object="${purchaseFormDto}" method="post" class="purchase-form">
-                <!-- Purchase Date field removed -->
-
                 <h2>Detalles de la Compra</h2>
                 <div class="product-search-area">
                     <div class="form-group product-autocomplete-group main-product-search">
@@ -61,7 +59,6 @@
                         <label for="mainBarcodeInput">Buscar Producto (Código de Barras):</label>
                         <input type="text" id="mainBarcodeInput" class="barcode-input" placeholder="Escanea o escribe el código de barras" />
                     </div>
-                    <!-- Button removed from here -->
                 </div>
 
                 <div id="purchase-details-rows">
@@ -69,15 +66,14 @@
                 </div>
                 
                 <div class="form-group total-section">
-                    <label>Total:</label>
+                    <label for="total">Total:</label>
                     <input type="text" id="total" name="total" value="0.00" readonly />
                 </div>
 
-                <button type="submit" class="btn-primary">Registrar Compra</button>
+                <button type="submit" class="btn btn-primary">Registrar Compra</button>
 
-                <!-- New position for the button -->
                 <div class="form-group" style="margin-top: 15px; text-align: right;">
-                    <button type="button" class="btn-secondary btn-add-new-product" id="openNewProductModalBtn" disabled>Nuevo Producto</button>
+                    <button type="button" class="btn btn-secondary btn-add-new-product" id="openNewProductModalBtn" disabled>Nuevo Producto</button>
                 </div>
             </form>
         </section>
@@ -87,74 +83,70 @@
 <!-- New Product Modal -->
 <div id="newProductModal" class="modal">
     <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Registrar Nuevo Producto</h2>
-        <form id="newProductForm" class="product-form">
-            <div class="form-group">
-                <label for="modalName">Nombre:</label>
-                <input type="text" id="modalName" name="name" required />
+        <div class="modal-header">
+            <h2>Registrar Nuevo Producto</h2>
+            <span class="close-button">&times;</span>
+        </div>
+        <form id="newProductForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modalName">Nombre:</label>
+                    <input type="text" id="modalName" name="name" required />
+                </div>
+                <div class="form-group">
+                    <label for="modalDescription">Descripción:</label>
+                    <textarea id="modalDescription" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="modalPrice">Precio de Venta:</label>
+                    <input type="number" id="modalPrice" name="price" step="0.01" required />
+                </div>
+                <div class="form-group">
+                    <label for="modalPurchasePrice">Precio de Compra:</label>
+                    <input type="number" id="modalPurchasePrice" name="purchasePrice" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label for="modalStock">Stock Inicial:</label>
+                    <input type="number" id="modalStock" name="stock" step="0.001" value="0" required />
+                </div>
+                <div class="form-group">
+                    <label for="modalCategory">Categoría:</label>
+                    <select id="modalCategory" name="categoryId">
+                        <option value="">Seleccione una categoría</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalSupplier">Proveedor:</label>
+                    <select id="modalSupplier" name="supplierId">
+                        <option value="">Seleccione un proveedor</option>
+                        <option th:each="sup : ${suppliers}" th:value="${sup.id}" th:text="${sup.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalUnit">Unidad de Medida:</label>
+                    <select id="modalUnit" name="unitId">
+                        <option value="">Seleccione una unidad</option>
+                        <option th:each="uom : ${unitsOfMeasure}" th:value="${uom.id}" th:text="${uom.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalSku">SKU:</label>
+                    <input type="text" id="modalSku" name="sku" />
+                </div>
+                <div class="form-group">
+                    <label for="modalBarcode">Código de Barras:</label>
+                    <input type="text" id="modalBarcode" name="barcode" />
+                </div>
+                <div class="form-group">
+                    <label for="modalImageUrl">URL de Imagen:</label>
+                    <input type="text" id="modalImageUrl" name="imageUrl" />
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="modalDescription">Descripción:</label>
-                <textarea id="modalDescription" name="description"></textarea>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                <button type="button" class="btn close-button-footer">Cancelar</button>
             </div>
-
-            <div class="form-group">
-                <label for="modalPrice">Precio de Venta:</label>
-                <input type="number" id="modalPrice" name="price" step="0.01" required />
-            </div>
-
-            <div class="form-group">
-                <label for="modalPurchasePrice">Precio de Compra:</label>
-                <input type="number" id="modalPurchasePrice" name="purchasePrice" step="0.01" />
-            </div>
-
-            <div class="form-group">
-                <label for="modalStock">Stock Inicial:</label>
-                <input type="number" id="modalStock" name="stock" step="0.001" value="0" required />
-            </div>
-
-            <div class="form-group">
-                <label for="modalCategory">Categoría:</label>
-                <select id="modalCategory" name="categoryId">
-                    <option value="">Seleccione una categoría</option>
-                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="modalSupplier">Proveedor:</label>
-                <select id="modalSupplier" name="supplierId">
-                    <option value="">Seleccione un proveedor</option>
-                    <option th:each="sup : ${suppliers}" th:value="${sup.id}" th:text="${sup.name}"></option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="modalUnit">Unidad de Medida:</label>
-                <select id="modalUnit" name="unitId">
-                    <option value="">Seleccione una unidad</option>
-                    <option th:each="uom : ${unitsOfMeasure}" th:value="${uom.id}" th:text="${uom.name}"></option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="modalSku">SKU:</label>
-                <input type="text" id="modalSku" name="sku" />
-            </div>
-
-            <div class="form-group">
-                <label for="modalBarcode">Código de Barras:</label>
-                <input type="text" id="modalBarcode" name="barcode" />
-            </div>
-
-            <div class="form-group">
-                <label for="modalImageUrl">URL de Imagen:</label>
-                <input type="text" id="modalImageUrl" name="imageUrl" />
-            </div>
-
-            <button type="submit" class="btn-primary">Guardar Producto</button>
         </form>
     </div>
 </div>
@@ -163,66 +155,60 @@
     /*<![CDATA[*/
 
     document.addEventListener('DOMContentLoaded', function() {
-        const purchaseDetailsRows = document.getElementById('purchase-details-rows'); // Changed ID
+        const purchaseDetailsRows = document.getElementById('purchase-details-rows');
         const mainProductNameInput = document.getElementById('mainProductNameInput');
         const mainBarcodeInput = document.getElementById('mainBarcodeInput');
-        const mainProductSuggestionsDiv = mainProductNameInput.nextElementSibling; // Suggestions div next to input
-        const openNewProductModalBtn = document.getElementById('openNewProductModalBtn'); // Get button reference
+        const mainProductSuggestionsDiv = mainProductNameInput.nextElementSibling;
+        const openNewProductModalBtn = document.getElementById('openNewProductModalBtn');
 
-        let productRowCounter = -1; // Start from -1 so first added product is purchaseDetails[0]
+        let productRowCounter = -1;
 
         // Modal elements
         const newProductModal = document.getElementById('newProductModal');
         const closeButton = newProductModal.querySelector('.close-button');
+        const closeButtonFooter = newProductModal.querySelector('.close-button-footer');
         const newProductForm = document.getElementById('newProductForm');
 
-        // Open modal
+        function closeModal() {
+            newProductModal.style.display = 'none';
+            newProductForm.reset();
+            openNewProductModalBtn.disabled = true;
+        }
+
         openNewProductModalBtn.addEventListener('click', function() {
             newProductModal.style.display = 'block';
-            // Populate dropdowns in modal form
             const modalCategorySelect = document.getElementById('modalCategory');
             const modalSupplierSelect = document.getElementById('modalSupplier');
             const modalUnitSelect = document.getElementById('modalUnit');
 
-            // Clear existing options (except the default "Seleccione...")
             modalCategorySelect.innerHTML = '<option value="">Seleccione una categoría</option>';
             modalSupplierSelect.innerHTML = '<option value="">Seleccione un proveedor</option>';
             modalUnitSelect.innerHTML = '<option value="">Seleccione una unidad</option>';
 
-            // Populate categories
             /*[# th:each="cat : ${categories}"]*/
             modalCategorySelect.options[modalCategorySelect.options.length] = new Option(/*[[${cat.name}]]*/ 'Category Name', /*[[${cat.id}]]*/ '1');
             /*[/]*/
 
-            // Populate suppliers
             /*[# th:each="sup : ${suppliers}"]*/
             modalSupplierSelect.options[modalSupplierSelect.options.length] = new Option(/*[[${sup.name}]]*/ 'Supplier Name', /*[[${sup.id}]]*/ '1');
             /*[/]*/
 
-            // Populate units of measure
             /*[# th:each="uom : ${unitsOfMeasure}"]*/
             modalUnitSelect.options[modalUnitSelect.options.length] = new Option(/*[[${uom.name}]]*/ 'Unit Name', /*[[${uom.id}]]*/ '1');
             /*[/]*/
         });
 
-        // Close modal
-        closeButton.addEventListener('click', function() {
-            newProductModal.style.display = 'none';
-            newProductForm.reset(); // Clear form fields
-            openNewProductModalBtn.disabled = true; // Disable button after closing modal
-        });
+        closeButton.addEventListener('click', closeModal);
+        closeButtonFooter.addEventListener('click', closeModal);
 
         window.addEventListener('click', function(event) {
             if (event.target == newProductModal) {
-                newProductModal.style.display = 'none';
-                newProductForm.reset(); // Clear form fields
-                openNewProductModalBtn.disabled = true; // Disable button after closing modal
+                closeModal();
             }
         });
 
-        // Handle modal form submission via AJAX
         newProductForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault();
 
             const formData = new FormData(newProductForm);
             const productData = {};
@@ -230,7 +216,7 @@
                 productData[key] = value;
             });
 
-            fetch('/products/new', { // Assuming /products/new can handle AJAX POST
+            fetch('/products/new', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -240,17 +226,13 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    // If response is not OK, try to read error message from body
                     return response.json().then(err => { throw err; });
                 }
-                return response.json(); // Assuming the controller returns the created product
+                return response.json();
             })
             .then(newProduct => {
                 alert('Producto "' + newProduct.name + '" registrado exitosamente!');
-                newProductModal.style.display = 'none';
-                newProductForm.reset();
-                // Removed: addProductToPurchase(newProduct); // Prevent automatic addition to purchase list
-                openNewProductModalBtn.disabled = true; // Disable button after successful product creation
+                closeModal();
             })
             .catch(error => {
                 console.error('Error al registrar producto:', error);
@@ -258,8 +240,6 @@
             });
         });
 
-
-        // Function to create a new product row
         function createProductRow(product) {
             productRowCounter++;
             const newRow = document.createElement('div');
@@ -282,16 +262,14 @@
                     <label>Precio Unitario:</label>
                     <input type="number" name="purchaseDetails[${productRowCounter}].price" step="0.01" value="${product.purchasePrice || product.price}" required />
                 </div>
-                <button type="button" class="btn-remove-product">Eliminar</button>
+                <button type="button" class="btn btn-remove-product">Eliminar</button>
             `;
-            purchaseDetailsRows.appendChild(newRow); // Append to purchaseDetailsRows
+            purchaseDetailsRows.appendChild(newRow);
             attachEventListenersToProductRow(newRow);
             updateTotal();
         }
 
-        // Function to add a product to the purchase (called from autocomplete or barcode scan)
         function addProductToPurchase(product) {
-            // Check if product is already in the list, if so, just increment quantity
             let existingRow = null;
             purchaseDetailsRows.querySelectorAll('.product-row').forEach(row => {
                 const productIdInput = row.querySelector('input[name$=".productId"]');
@@ -307,35 +285,30 @@
                 createProductRow(product);
             }
             updateTotal();
-            openNewProductModalBtn.disabled = true; // Disable button after adding product
+            openNewProductModalBtn.disabled = true;
         }
 
-
-        // Attach event listeners for autocomplete and remove button
         function attachEventListenersToProductRow(row) {
             const removeButton = row.querySelector('.btn-remove-product');
             const quantityInput = row.querySelector('input[name$=".quantity"]');
             const productPriceInput = row.querySelector('input[name$=".price"]');
 
-            // Remove product row
             removeButton.addEventListener('click', function() {
                 row.remove();
                 updateTotal();
             });
 
-            // Update total on quantity or price change
             quantityInput.addEventListener('input', updateTotal);
             productPriceInput.addEventListener('input', updateTotal);
         }
 
-        // Autocomplete logic for mainProductNameInput
         let debounceTimer;
         mainProductNameInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             const searchTerm = this.value;
             if (searchTerm.length < 2) {
                 mainProductSuggestionsDiv.innerHTML = '';
-                openNewProductModalBtn.disabled = true; // Disable if search term is too short
+                openNewProductModalBtn.disabled = true;
                 return;
             }
 
@@ -350,65 +323,59 @@
                                 suggestionItem.classList.add('suggestion-item');
                                 suggestionItem.textContent = product.name;
                                 suggestionItem.dataset.productId = product.id;
-                                suggestionItem.dataset.productPrice = product.purchasePrice || product.price;
                                 suggestionItem.addEventListener('click', function() {
                                     addProductToPurchase(product);
-                                    mainProductNameInput.value = ''; // Clear input after selection
+                                    mainProductNameInput.value = '';
                                     mainProductSuggestionsDiv.innerHTML = '';
-                                    openNewProductModalBtn.disabled = true; // Disable after selection
+                                    openNewProductModalBtn.disabled = true;
                                 });
                                 mainProductSuggestionsDiv.appendChild(suggestionItem);
                             });
-                            openNewProductModalBtn.disabled = true; // Disable if products are found
+                            openNewProductModalBtn.disabled = true;
                         } else {
                             mainProductSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
-                            openNewProductModalBtn.disabled = false; // Enable if no products are found
+                            openNewProductModalBtn.disabled = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching products:', error);
                         mainProductSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar productos.</div>';
-                        openNewProductModalBtn.disabled = false; // Enable if there's an error
+                        openNewProductModalBtn.disabled = false;
                     });
             }, 300);
         });
 
-        // Clear suggestions when input loses focus
         mainProductNameInput.addEventListener('blur', function() {
             setTimeout(() => {
                 mainProductSuggestionsDiv.innerHTML = '';
-                // Do not disable here, let the input event handle it or explicit selection
             }, 200);
         });
 
-        // Barcode search logic
-        mainBarcodeInput.addEventListener('change', function() { // Use 'change' event for barcode scanners
+        mainBarcodeInput.addEventListener('change', function() {
             const barcode = this.value;
             if (barcode.length > 0) {
-                fetch(`/products/search?barcode=${barcode}`) // New endpoint for barcode search
+                fetch(`/products/search?barcode=${barcode}`)
                     .then(response => response.json())
                     .then(products => {
                         if (products.length > 0) {
-                            addProductToPurchase(products[0]); // Assume barcode is unique, take the first
-                            mainBarcodeInput.value = ''; // Clear input after adding
-                            openNewProductModalBtn.disabled = true; // Disable after finding product
+                            addProductToPurchase(products[0]);
+                            mainBarcodeInput.value = '';
+                            openNewProductModalBtn.disabled = true;
                         } else {
                             alert('Producto con código de barras "' + barcode + '" no encontrado.');
-                            openNewProductModalBtn.disabled = false; // Enable if no product found by barcode
+                            openNewProductModalBtn.disabled = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching product by barcode:', error);
                         alert('Error al buscar producto por código de barras.');
-                        openNewProductModalBtn.disabled = false; // Enable if there's an error
+                        openNewProductModalBtn.disabled = false;
                     });
             } else {
-                openNewProductModalBtn.disabled = true; // Disable if barcode input is cleared
+                openNewProductModalBtn.disabled = true;
             }
         });
 
-
-        // Calculate total
         function updateTotal() {
             let grandTotal = 0;
             purchaseDetailsRows.querySelectorAll('.product-row').forEach(row => {
@@ -419,7 +386,6 @@
             document.getElementById('total').value = grandTotal.toFixed(2);
         }
 
-        // Initial total calculation (if any static rows were present, which they are not now)
         updateTotal();
     });
 

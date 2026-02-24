@@ -15,4 +15,9 @@ class HomeController {
         model.addAttribute("infoPing", infoPing);
         return "layout"; // Changed view name to layout
     }
+
+    @GetMapping("/pos")
+    fun pointOfSale(): String {
+        return "point_of_sale"
+    }
 }

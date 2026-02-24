@@ -8,7 +8,6 @@ import com.panificadora.isra.ptvisr.repositories.PurchaseRepository
 import com.panificadora.isra.ptvisr.repositories.SupplierRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 @Service
 class PurchaseService(
@@ -28,11 +27,11 @@ class PurchaseService(
         val purchase = Purchase(
             supplier = supplier,
             purchaseDate = purchaseFormDto.purchaseDate,
-            total = BigDecimal.ZERO // Will be calculated from details
+            total = 0.0 // Will be calculated from details
         )
 
         val purchaseDetails = mutableListOf<PurchaseDetail>()
-        var calculatedTotal = BigDecimal.ZERO
+        var calculatedTotal = 0.0
 
         for (detailDto in purchaseFormDto.purchaseDetails) {
             val product = productRepository.findById(detailDto.productId).orElseThrow {
@@ -49,10 +48,10 @@ class PurchaseService(
             purchaseDetails.add(purchaseDetail)
 
             // Update product stock
-            product.stock = product.stock.add(detailDto.quantity)
+            product.stock = product.stock + detailDto.quantity
             productRepository.save(product) // Save updated product stock
 
-            calculatedTotal = calculatedTotal.add(detailDto.quantity.multiply(detailDto.price))
+            calculatedTotal = calculatedTotal + (detailDto.quantity * detailDto.price)
         }
 
         purchase.details.addAll(purchaseDetails)

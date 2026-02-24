@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.http.ResponseEntity
-import java.math.BigDecimal
+
+// Import the new DTOs and mappers
+import com.panificadora.isra.ptvisr.dtos.ProductDto
+import com.panificadora.isra.ptvisr.dtos.ProductFormDto
+import com.panificadora.isra.ptvisr.dtos.toDto
+import com.panificadora.isra.ptvisr.dtos.toEntity
 
 @Controller
 @RequestMapping("/products")
@@ -28,21 +33,19 @@ class ProductController(
 
     @GetMapping("/new")
     fun showProductForm(model: Model): String {
-        model.addAttribute("product", Product(
+        model.addAttribute("productForm", ProductFormDto(
             name = "",
             description = null,
-            price = BigDecimal.ZERO,
-            stock = BigDecimal.ZERO,
-            category = null,
+            price = Double.MIN_VALUE,
+            stock = Double.MIN_VALUE,
             categoryId = null,
-            supplier = null,
             supplierId = null,
             imageUrl = null,
             purchasePrice = null,
             sku = null,
             barcode = null,
-            unit = null,
-            unitId = null
+            unitId = null,
+            stockLimit = null
         ))
         model.addAttribute("categories", categoryRepository.findAll())
         model.addAttribute("suppliers", supplierRepository.findAll())
@@ -52,30 +55,25 @@ class ProductController(
 
     @PostMapping("/new")
     @ResponseBody
-    fun saveProductAjax(@RequestBody product: Product): ResponseEntity<Product> {
+    fun saveProductAjax(@RequestBody productFormDto: ProductFormDto): ResponseEntity<ProductDto> {
         // Server-side validation for required fields
-        if (product.name.isBlank()) {
+        if (productFormDto.name.isBlank()) {
             return ResponseEntity.badRequest().build() // Or return a more specific error message
         }
-        if (product.price == null || product.price <= BigDecimal.ZERO) {
+        if (productFormDto.price <= Double.MIN_VALUE) {
             return ResponseEntity.badRequest().build() // Or return a more specific error message
         }
-        if (product.stock == null || product.stock < BigDecimal.ZERO) { // Stock can be zero
+        if (productFormDto.stock < Double.MIN_VALUE) { // Stock can be zero
             return ResponseEntity.badRequest().build() // Or return a more specific error message
         }
 
-        product.categoryId?.let {
-            product.category = categoryRepository.findById(it).orElse(null)
-        }
-        product.supplierId?.let {
-            product.supplier = supplierRepository.findById(it).orElse(null)
-        }
-        product.unitId?.let {
-            product.unit = unitOfMeasureRepository.findById(it).orElse(null)
-        }
+        val category = productFormDto.categoryId?.let { categoryRepository.findById(it).orElse(null) }
+        val supplier = productFormDto.supplierId?.let { supplierRepository.findById(it).orElse(null) }
+        val unitOfMeasure = productFormDto.unitId?.let { unitOfMeasureRepository.findById(it).orElse(null) }
 
+        val product = productFormDto.toEntity(category, supplier, unitOfMeasure)
         val savedProduct = productRepository.save(product)
-        return ResponseEntity.ok(savedProduct)
+        return ResponseEntity.ok(savedProduct.toDto())
     }
 
     @GetMapping("/search")
@@ -83,13 +81,14 @@ class ProductController(
     fun searchProducts(
         @RequestParam(required = false) searchTerm: String?,
         @RequestParam(required = false) barcode: String?
-    ): List<Product> {
-        if (!searchTerm.isNullOrBlank()) {
-            return productRepository.findByNameContainingIgnoreCase(searchTerm)
+    ): List<ProductDto> {
+        val products = if (!searchTerm.isNullOrBlank()) {
+            productRepository.findByNameContainingIgnoreCase(searchTerm)
+        } else if (!barcode.isNullOrBlank()) {
+            productRepository.findByBarcode(barcode)
+        } else {
+            emptyList()
         }
-        if (!barcode.isNullOrBlank()) {
-            return productRepository.findByBarcode(barcode)
-        }
-        return emptyList()
+        return products.map { it.toDto() }
     }
 }
