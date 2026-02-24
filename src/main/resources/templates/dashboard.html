@@ -3,47 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTVISR - Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>PTVISR - Dashboard Test</title>
 </head>
 <body>
-<div class="container">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>PTVISR</h2>
-        </div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li><a href="/" class="nav-item">Dashboard</a></li>
-                <li><a href="/pos" class="nav-item">Punto de Venta</a></li>
-                <li class="nav-category">Inventario</li>
-                <li><a href="/inventory/products" class="nav-item">Productos</a></li>
-                <li><a href="/inventory/movements" class="nav-item">Movimientos</a></li>
-                <li><a href="/inventory/categories" class="nav-item">Categorías</a></li>
-                <li><a href="/inventory/units" class="nav-item">Unidades de Medida</a></li>
-                <li class="nav-category">Compras</li>
-                <li><a href="/purchases/new" class="nav-item">Registrar Compra</a></li>
-                <li><a href="/purchases" class="nav-item">Listado de Compras</a></li>
-                <li><a href="/suppliers" class="nav-item">Proveedores</a></li>
-                <li class="nav-category">Ventas</li>
-                <li><a href="/sales" class="nav-item">Listado de Ventas</a></li>
-                <li><a href="/customers" class="nav-item">Clientes</a></li>
-                <li class="nav-category">Administración</li>
-                <li><a href="/users" class="nav-item">Usuarios</a></li>
-                <li class="nav-category">Reportes</li>
-                <li><a href="/reports" class="nav-item">Ver Reportes</a></li>
-            </ul>
-        </nav>
-    </aside>
-    <main class="main-content">
-        <header class="main-header">
-            <h1>Dashboard</h1>
-        </header>
-        <section class="content-area">
-            <p th:text="${infoPing}"></p>
-            <!-- Add more dashboard specific content here later -->
-        </section>
-    </main>
-</div>
+    <h1>Dashboard Test Page</h1>
+    <p th:text="${infoPing}"></p>
+    <p>If you see this, dashboard.html is rendering.</p>
 </body>
 </html>

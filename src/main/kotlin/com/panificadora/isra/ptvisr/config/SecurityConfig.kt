@@ -35,7 +35,6 @@ class SecurityConfig {
                 auth
                     .requestMatchers("/auth/**").permitAll() // Allow access to auth endpoints
                     .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // Allow static resources
-                    
                     .anyRequest().authenticated() // All other requests require authentication
             }
             .sessionManagement { session ->

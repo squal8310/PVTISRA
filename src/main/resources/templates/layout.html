@@ -32,6 +32,13 @@
                     <li><a href="/users" class="nav-item">Usuarios</a></li>
                     <li class="nav-category">Reportes</li>
                     <li><a href="/reports" class="nav-item">Ver Reportes</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: block;">
+                            <button type="submit" class="nav-item logout-button">
+                                Salir
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </nav>
         </aside>

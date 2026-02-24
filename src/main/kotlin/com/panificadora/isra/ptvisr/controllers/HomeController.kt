@@ -13,7 +13,8 @@ class HomeController {
     fun home(model: Model): String {
         val infoPing = "Bienvenido al sistema POS e Inventario. Fecha: "+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
         model.addAttribute("infoPing", infoPing);
-        return "layout"; // Changed view name to layout
+        model.addAttribute("pageTitle", "Dashboard"); // Add pageTitle for the layout
+        return "layout";
     }
 
     @GetMapping("/pos")

@@ -136,6 +136,12 @@
         .modal-footer .btn {
             margin-left: 10px;
         }
+
+        /* New style for low stock */
+        .low-stock {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -288,6 +294,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let saleItems = [];
 
     function addProductToSale(product) {
+        if (product.stock <= 0) {
+            alert('Producto sin stock disponible.');
+            return;
+        }
+
         const existingItem = saleItems.find(item => item.id === product.id);
 
         if (existingItem) {
@@ -298,7 +309,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: product.name,
                 quantity: 1,
                 price: product.price,
-                stock: product.stock
+                stock: product.stock,
+                stockLimit: product.stockLimit // Add stockLimit here
             });
         }
         renderSaleItems();
@@ -308,14 +320,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderSaleItems() {
         saleItemsTbody.innerHTML = '';
         saleItems.forEach((item, index) => {
+            const stockClass = (item.stockLimit !== null && item.stock <= item.stockLimit) ? 'low-stock' : '';
             const row = document.createElement('tr');
             row.dataset.index = index;
             row.innerHTML = `
                 <td>${item.name}</td>
-                <td>${item.stock}</td>
+                <td><span class="${stockClass}">${item.stock}</span></td>
                 <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" step="1"></td>
-                <td>$${item.price.toFixed(2)}</td>
-                <td>$${(item.quantity * item.price).toFixed(2)}</td>
+                <td>${item.price.toFixed(2)}</td>
+                <td>${(item.quantity * item.price).toFixed(2)}</td>
                 <td><button class="btn btn-remove-item">Eliminar</button></td>
             `;
             saleItemsTbody.appendChild(row);
@@ -365,6 +378,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     productSuggestionsDiv.innerHTML = '';
                     if (products.length > 0) {
                         if (isBarcodeSearch) { // If it's a barcode search and at least one product is found, add the first one directly
+                            if (products[0].stock <= 0) {
+                                alert('Producto sin stock disponible.');
+                                productNameInput.value = ''; // Clear input
+                                productSuggestionsDiv.innerHTML = ''; // Clear suggestions
+                                productNameInput.focus(); // Keep focus for next scan
+                                return;
+                            }
                             addProductToSale(products[0]);
                             productNameInput.value = ''; // Clear input
                             productSuggestionsDiv.innerHTML = ''; // Clear suggestions
@@ -372,6 +392,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         } else {
                             // Otherwise (name search), display suggestions as usual
                             products.forEach(product => {
+                                if (product.stock <= 0) {
+                                    // Skip adding to suggestions if stock is 0
+                                    return;
+                                }
                                 const suggestionItem = document.createElement('div');
                                 suggestionItem.classList.add('suggestion-item');
                                 suggestionItem.textContent = `${product.name} - ${product.price.toFixed(2)}`;
