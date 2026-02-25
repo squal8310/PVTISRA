@@ -229,7 +229,7 @@
                 </div>
                 <div class="form-group">
                     <label>Cantidad:</label>
-                    <input type="number" name="purchaseDetails[${productRowCounter}].quantity" step="0.001" value="1" required />
+                    <input type="text" name="purchaseDetails[${productRowCounter}].quantity" value="1" required data-stock="${product.stock}" />
                 </div>
                 <div class="form-group">
                     <label>Precio Unitario:</label>
@@ -265,14 +265,49 @@
             const removeButton = row.querySelector('.btn-remove-product');
             const quantityInput = row.querySelector('input[name$=".quantity"]');
             const productPriceInput = row.querySelector('input[name$=".price"]');
+            const productStock = parseFloat(quantityInput.dataset.stock); // Get stock from data attribute
 
             removeButton.addEventListener('click', function() {
                 row.remove();
                 updateTotal();
             });
 
+            // Keep existing input listener for general updates, but add keyup for specific validation
             quantityInput.addEventListener('input', updateTotal);
             productPriceInput.addEventListener('input', updateTotal);
+
+            quantityInput.addEventListener('keyup', function() {
+                let value = this.value;
+
+                // 1. Remove non-digit characters
+                value = value.replace(/\D/g, '');
+
+                // 2. Prevent '0' as the first digit if it's a multi-digit number
+                if (value.length > 1 && value.startsWith('0')) {
+                    value = parseInt(value, 10).toString(); // Convert to number and back to string to remove leading zeros
+                } else if (value === '0') {
+                    value = ''; // If only '0' is entered, clear it
+                }
+
+                // Update the input field with the cleaned value
+                this.value = value;
+
+                // Update quantity in the form field and apply stock validation
+                let newQuantity = parseInt(value, 10);
+
+                if (!isNaN(newQuantity) && newQuantity > 0) {
+                    if (newQuantity > productStock) {
+                        alert(`La cantidad máxima disponible es ${productStock}.`);
+                        newQuantity = productStock; // Set to max available stock
+                        this.value = newQuantity; // Update input field
+                    }
+                    // No need to update saleItems array directly here, as updateTotal will read from input fields
+                } else if (value === '') {
+                    // If the field is empty, treat quantity as 0 for total calculation
+                    this.value = '';
+                }
+                updateTotal(); // Recalculate total after quantity change
+            });
         }
 
         let debounceTimer;

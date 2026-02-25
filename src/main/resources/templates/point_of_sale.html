@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.innerHTML = `
                 <td>${item.name}</td>
                 <td><span class="${stockClass}">${item.stock}</span></td>
-                <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" step="1"></td>
+                <td><input type="text" class="quantity-input" value="${item.quantity}"></td>
                 <td>${item.price.toFixed(2)}</td>
                 <td>${(item.quantity * item.price).toFixed(2)}</td>
                 <td><button class="btn btn-remove-item">Eliminar</button></td>
@@ -409,13 +409,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saleItemsTbody.addEventListener('input', function(e) {
         if (e.target.classList.contains('quantity-input')) {
-            const rowIndex = e.target.closest('tr').dataset.index;
-            const newQuantity = parseInt(e.target.value, 10);
-            if (newQuantity > 0) {
-                saleItems[rowIndex].quantity = newQuantity;
-                renderSaleItems();
-                updateSummary();
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            const rowIndex = row.dataset.index;
+            const item = saleItems[rowIndex];
+            let value = e.target.value;
+
+            // Clean input to allow only non-negative integers
+            value = value.replace(/\D/g, '');
+
+            let newQuantity = parseInt(value, 10);
+
+            // If input is empty or not a valid number, treat as 0
+            if (isNaN(newQuantity)) {
+                newQuantity = 0;
+                e.target.value = ''; // Keep input empty
+            } else {
+                 // Check against stock
+                if (newQuantity > item.stock) {
+                    newQuantity = item.stock;
+                }
+                // Update input value to reflect cleaned/capped number.
+                // This also handles removing leading zeros (e.g., "05" -> "5")
+                e.target.value = newQuantity;
             }
+            
+            // Handle case where input becomes empty/zero
+            if (newQuantity === 0) {
+                 e.target.value = '';
+            }
+
+            item.quantity = newQuantity;
+
+            // Update line total and summary
+            row.querySelector('td:nth-child(5)').textContent = (item.quantity * item.price).toFixed(2);
+            updateSummary();
         }
     });
 
@@ -453,12 +482,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cancelPaymentBtn.addEventListener('click', function() {
         paymentModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target == paymentModal) {
-            paymentModal.style.display = 'none';
-        }
     });
 
     // Calculate change dynamically
