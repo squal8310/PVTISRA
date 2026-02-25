@@ -6,6 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        .tab-button {
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: 0.3s;
+            font-size: 16px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            margin-right: 2px;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff; /* To hide the bottom border of the tab-buttons div */
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+            border-top: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .product-form {
+            padding: 0; /* Remove padding from form as content has its own */
+            border: none; /* Remove border from form as tab-container will handle it visually */
+            background-color: transparent; /* Remove background from form */
+        }
+        .tab-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4682B4;
+            border-bottom: 1px solid #DDD;
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -14,9 +65,195 @@
             <h1>Product Template</h1>
         </header>
         <section class="content-area">
-            <!-- Content for specific view of product_form-->
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="registro">Registro Artículo</button>
+                    <button class="tab-button" data-tab="inventario">Inventario</button>
+                    <button class="tab-button" data-tab="mayoreo">Mayoreo</button>
+                </div>
+
+                <form th:action="@{/products}" th:object="${productForm}" method="post" class="product-form">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div id="registro" class="tab-content active">
+                        <h2>Registro de Artículo</h2>
+                        <div class="form-group">
+                            <label for="name">Nombre:</label>
+                            <input type="text" id="name" th:field="*{name}" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Descripción:</label>
+                            <textarea id="description" th:field="*{description}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="sku">SKU:</label>
+                            <input type="text" id="sku" th:field="*{sku}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="barcode">Código de Barras:</label>
+                            <input type="text" id="barcode" th:field="*{barcode}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Precio de Venta:</label>
+                            <input type="text" id="price" th:field="*{price}" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="purchasePrice">Precio de Compra:</label>
+                            <input type="text" id="purchasePrice" th:field="*{purchasePrice}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryId">Categoría:</label>
+                            <select id="categoryId" th:field="*{categoryId}">
+                                <option value="">Seleccione una categoría</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="unitId">Unidad de Medida:</label>
+                            <select id="unitId" th:field="*{unitId}">
+                                <option value="">Seleccione una unidad</option>
+                                <option th:each="uom : ${unitsOfMeasure}" th:value="${uom.id}" th:text="${uom.name}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierId">Proveedor:</label>
+                            <select id="supplierId" th:field="*{supplierId}">
+                                <option value="">Seleccione un proveedor</option>
+                                <option th:each="sup : ${suppliers}" th:value="${sup.id}" th:text="${sup.name}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="imageUrl">URL de Imagen:</label>
+                            <input type="text" id="imageUrl" th:field="*{imageUrl}" />
+                        </div>
+                    </div>
+
+                    <div id="inventario" class="tab-content">
+                        <h2>Gestión de Inventario</h2>
+                        <div class="form-group">
+                            <label for="stock">Stock Actual:</label>
+                            <input type="text" id="stock" th:field="*{stock}" step="0.001" value="0" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="stockLimit">Stock Mínimo (Alerta):</label>
+                            <input type="text" id="stockLimit" th:field="*{stockLimit}" />
+                        </div>
+                    </div>
+
+                    <div id="mayoreo" class="tab-content">
+                        <h2>Precios de Mayoreo</h2>
+                        <div class="form-group">
+                            <label for="wholesalePrice">Precio de Mayoreo:</label>
+                            <input type="text" id="wholesalePrice"  />
+                        </div>
+                        <div class="form-group">
+                            <label for="minWholesaleQuantity">Cantidad Mínima para Mayoreo:</label>
+                            <input type="text" id="minWholesaleQuantity"  />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                    <a th:href="@{/inventory/products}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
         </section>
     </main>
 </div>
+    <script>
+/*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    console.log('Tab button clicked:', button.dataset.tab); // Debug log
+
+                    // Deactivate all buttons and hide all content
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Activate clicked button and show corresponding content
+                    button.classList.add('active');
+                    const targetTabId = button.dataset.tab;
+                    const targetContent = document.getElementById(targetTabId);
+                    if (targetContent) { // Check if target content exists
+                        targetContent.classList.add('active');
+                    } else {
+                        console.error('Target tab content not found for ID:', targetTabId);
+                    }
+                });
+            });
+
+            // Numeric input masking for product form
+            function enforcePositiveNumber(event) {
+                let value = event.target.value;
+
+                // Allow digits and a single decimal point
+                value = value.replace(/[^0-9.]/g, '');
+
+                // Ensure only one decimal point
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+
+                // Remove leading zeros unless it's "0." or "0" itself (which will be cleared later)
+                if (value.length > 1 && value.startsWith('0') && !value.startsWith('0.')) {
+                    value = value.substring(1);
+                }
+
+                let numValue = parseFloat(value);
+
+                // Enforce minimum positive value (e.g., > 0)
+                if (isNaN(numValue) || numValue <= 0) {
+                    event.target.value = ''; // Clear if invalid or non-positive
+                } else {
+                    event.target.value = value; // Keep the cleaned value
+                }
+            }
+
+            function enforcePositiveInteger(event) {
+                let value = event.target.value;
+
+                // Remove non-digit characters
+                value = value.replace(/\D/g, '');
+
+                // Remove leading zeros unless it's "0" itself (which will be cleared later)
+                if (value.length > 1 && value.startsWith('0')) {
+                    value = parseInt(value, 10).toString(); // Convert to number and back to string to remove leading zeros
+                }
+
+                let numValue = parseInt(value, 10);
+
+                // Enforce minimum 1
+                if (isNaN(numValue) || numValue < 1) {
+                    event.target.value = ''; // Clear if invalid or less than 1
+                } else {
+                    event.target.value = numValue.toString(); // Update to cleaned number
+                }
+            }
+
+            // Attach event listeners to numeric inputs
+            const numericInputs = [
+                { id: 'price', handler: enforcePositiveNumber },
+                { id: 'purchasePrice', handler: enforcePositiveNumber },
+                { id: 'stock', handler: enforcePositiveNumber },
+                { id: 'stockLimit', handler: enforcePositiveNumber },
+                { id: 'wholesalePrice', handler: enforcePositiveNumber },
+                { id: 'minWholesaleQuantity', handler: enforcePositiveInteger }
+            ];
+
+            numericInputs.forEach(inputConfig => {
+                const element = document.getElementById(inputConfig.id);
+                if (element) {
+                    element.addEventListener('input', inputConfig.handler);
+                } else {
+                    console.warn(`Element with ID '${inputConfig.id}' not found for numeric mask.`);
+                }
+            });
+        });
+/*]]>*/
+    </script>
 </body>
 </html>

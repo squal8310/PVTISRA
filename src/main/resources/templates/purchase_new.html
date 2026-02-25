@@ -15,22 +15,20 @@
         <section class="content-area">
             <div th:if="${successMessage}" class="alert alert-success">
                 <p th:text="${successMessage}"></p>
+                <button type="button" class="alert-close-btn">X</button>
             </div>
             <div th:if="${errorMessage}" class="alert alert-danger">
                 <p th:text="${errorMessage}"></p>
+                <button type="button" class="alert-close-btn">X</button>
             </div>
 
             <form th:action="@{/purchases/new}" th:object="${purchaseFormDto}" method="post" class="purchase-form">
                 <h2>Detalles de la Compra</h2>
                 <div class="product-search-area">
                     <div class="form-group product-autocomplete-group main-product-search">
-                        <label for="mainProductNameInput">Buscar Producto (Nombre):</label>
-                        <input type="text" id="mainProductNameInput" class="product-name-input" placeholder="Escribe el nombre del producto" />
+                        <label for="productSearchInput">Buscar Producto (Nombre o Código de Barras):</label>
+                        <input type="text" id="productSearchInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
                         <div class="product-suggestions"></div>
-                    </div>
-                    <div class="form-group main-barcode-search">
-                        <label for="mainBarcodeInput">Buscar Producto (Código de Barras):</label>
-                        <input type="text" id="mainBarcodeInput" class="barcode-input" placeholder="Escanea o escribe el código de barras" />
                     </div>
                 </div>
 
@@ -129,9 +127,8 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const purchaseDetailsRows = document.getElementById('purchase-details-rows');
-        const mainProductNameInput = document.getElementById('mainProductNameInput');
-        const mainBarcodeInput = document.getElementById('mainBarcodeInput');
-        const mainProductSuggestionsDiv = mainProductNameInput.nextElementSibling;
+        const productSearchInput = document.getElementById('productSearchInput'); // Renamed
+        const productSuggestionsDiv = productSearchInput.nextElementSibling; // Renamed
         const openNewProductModalBtn = document.getElementById('openNewProductModalBtn');
 
         let productRowCounter = -1;
@@ -272,117 +269,109 @@
                 updateTotal();
             });
 
-            // Keep existing input listener for general updates, but add keyup for specific validation
-            quantityInput.addEventListener('input', updateTotal);
-            productPriceInput.addEventListener('input', updateTotal);
-
-            quantityInput.addEventListener('keyup', function() {
+            // Combined input listener for quantity validation and updates
+            quantityInput.addEventListener('input', function() {
                 let value = this.value;
 
-                // 1. Remove non-digit characters
+                // Clean input to allow only non-negative integers
                 value = value.replace(/\D/g, '');
 
-                // 2. Prevent '0' as the first digit if it's a multi-digit number
-                if (value.length > 1 && value.startsWith('0')) {
-                    value = parseInt(value, 10).toString(); // Convert to number and back to string to remove leading zeros
-                } else if (value === '0') {
-                    value = ''; // If only '0' is entered, clear it
-                }
-
-                // Update the input field with the cleaned value
-                this.value = value;
-
-                // Update quantity in the form field and apply stock validation
                 let newQuantity = parseInt(value, 10);
 
-                if (!isNaN(newQuantity) && newQuantity > 0) {
+                // If input is empty or not a valid number, treat as 0
+                if (isNaN(newQuantity)) {
+                    newQuantity = 0;
+                    this.value = ''; // Keep input empty
+                } else {
+                    // Check against stock (for purchase, this is more of a warning/cap, not strict stock)
+                    // The user's request was to cap at stock, so we'll apply that.
                     if (newQuantity > productStock) {
-                        alert(`La cantidad máxima disponible es ${productStock}.`);
-                        newQuantity = productStock; // Set to max available stock
-                        this.value = newQuantity; // Update input field
+                        newQuantity = productStock;
                     }
-                    // No need to update saleItems array directly here, as updateTotal will read from input fields
-                } else if (value === '') {
-                    // If the field is empty, treat quantity as 0 for total calculation
-                    this.value = '';
+                    // Update input value to reflect cleaned/capped number.
+                    this.value = newQuantity;
                 }
+                
+                // Handle case where input becomes empty/zero
+                if (newQuantity === 0) {
+                     this.value = '';
+                }
+
+                // No need to update saleItems array directly here, as updateTotal will read from input fields
                 updateTotal(); // Recalculate total after quantity change
             });
+
+            productPriceInput.addEventListener('input', updateTotal);
         }
 
         let debounceTimer;
-        mainProductNameInput.addEventListener('input', function() {
+        productSearchInput.addEventListener('input', function() { // Changed to productSearchInput
             clearTimeout(debounceTimer);
-            const searchTerm = this.value;
+            const searchTerm = this.value.trim(); // Trim whitespace
             if (searchTerm.length < 2) {
-                mainProductSuggestionsDiv.innerHTML = '';
+                productSuggestionsDiv.innerHTML = '';
                 openNewProductModalBtn.disabled = true;
                 return;
             }
 
             debounceTimer = setTimeout(() => {
-                fetch(`/products/search?searchTerm=${searchTerm}`)
+                const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/; // EAN-like barcode patterns
+                let url = `/products/search?`;
+                const isBarcodeSearch = eanRegex.test(searchTerm); // Flag to know if it was a barcode search
+
+                if (isBarcodeSearch) {
+                    url += `barcode=${searchTerm}`;
+                } else {
+                    url += `searchTerm=${searchTerm}`;
+                }
+
+                fetch(url)
                     .then(response => response.json())
                     .then(products => {
-                        mainProductSuggestionsDiv.innerHTML = '';
+                        productSuggestionsDiv.innerHTML = '';
                         if (products.length > 0) {
-                            products.forEach(product => {
-                                const suggestionItem = document.createElement('div');
-                                suggestionItem.classList.add('suggestion-item');
-                                suggestionItem.textContent = product.name;
-                                suggestionItem.dataset.productId = product.id;
-                                suggestionItem.addEventListener('click', function() {
-                                    addProductToPurchase(product);
-                                    mainProductNameInput.value = '';
-                                    mainProductSuggestionsDiv.innerHTML = '';
-                                    openNewProductModalBtn.disabled = true;
+                            if (isBarcodeSearch) { // If it's a barcode search and at least one product is found, add the first one directly
+                                addProductToPurchase(products[0]);
+                                productSearchInput.value = ''; // Clear input
+                                productSuggestionsDiv.innerHTML = ''; // Clear suggestions
+                                productSearchInput.focus(); // Keep focus for next scan
+                            } else {
+                                // Otherwise (name search), display suggestions as usual
+                                products.forEach(product => {
+                                    const suggestionItem = document.createElement('div');
+                                    suggestionItem.classList.add('suggestion-item');
+                                    suggestionItem.textContent = `${product.name} - Stock: ${product.stock}`; // Added stock to suggestion
+                                    suggestionItem.dataset.productId = product.id;
+                                    suggestionItem.addEventListener('click', function() {
+                                        addProductToPurchase(product);
+                                        productSearchInput.value = '';
+                                        productSuggestionsDiv.innerHTML = '';
+                                        openNewProductModalBtn.disabled = true;
+                                    });
+                                    productSuggestionsDiv.appendChild(suggestionItem);
                                 });
-                                mainProductSuggestionsDiv.appendChild(suggestionItem);
-                            });
+                            }
                             openNewProductModalBtn.disabled = true;
                         } else {
-                            mainProductSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
+                            productSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
                             openNewProductModalBtn.disabled = false;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching products:', error);
-                        mainProductSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar productos.</div>';
+                        productSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar productos.</div>';
                         openNewProductModalBtn.disabled = false;
                     });
             }, 300);
         });
 
-        mainProductNameInput.addEventListener('blur', function() {
+        productSearchInput.addEventListener('blur', function() { // Changed to productSearchInput
             setTimeout(() => {
-                mainProductSuggestionsDiv.innerHTML = '';
+                productSuggestionsDiv.innerHTML = '';
             }, 200);
         });
 
-        mainBarcodeInput.addEventListener('change', function() {
-            const barcode = this.value;
-            if (barcode.length > 0) {
-                fetch(`/products/search?barcode=${barcode}`)
-                    .then(response => response.json())
-                    .then(products => {
-                        if (products.length > 0) {
-                            addProductToPurchase(products[0]);
-                            mainBarcodeInput.value = '';
-                            openNewProductModalBtn.disabled = true;
-                        } else {
-                            alert('Producto con código de barras "' + barcode + '" no encontrado.');
-                            openNewProductModalBtn.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching product by barcode:', error);
-                        alert('Error al buscar producto por código de barras.');
-                        openNewProductModalBtn.disabled = false;
-                    });
-            } else {
-                openNewProductModalBtn.disabled = true;
-            }
-        });
+        // Removed mainBarcodeInput.addEventListener('change', ...)
 
         function updateTotal() {
             let grandTotal = 0;
