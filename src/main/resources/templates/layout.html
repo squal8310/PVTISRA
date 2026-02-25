@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTVISR - POS & Inventario</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         .logout-button {
             background-color: #dc3545; /* Red color for danger/logout */
@@ -40,28 +41,28 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="/" class="nav-item">Dashboard</a></li>
-                    <li><a href="/pos" class="nav-item">Punto de Venta</a></li>
+                    <li><a href="/" class="nav-item"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li><a href="/pos" class="nav-item"><i class="bi bi-cart"></i> Punto de Venta</a></li>
                     <li class="nav-category">Inventario</li>
-                    <li><a href="/inventory/products" class="nav-item">Productos</a></li>
-                    <li><a href="/inventory/movements" class="nav-item">Movimientos</a></li>
-                    <li><a href="/inventory/categories" class="nav-item">Categorías</a></li>
-                    <li><a href="/inventory/units" class="nav-item">Unidades de Medida</a></li>
+                    <li><a href="/inventory/products" class="nav-item"><i class="bi bi-box-seam"></i> Productos</a></li>
+                    <li><a href="/inventory/movements" class="nav-item"><i class="bi bi-arrow-left-right"></i> Movimientos</a></li>
+                    <li><a href="/inventory/categories" class="nav-item"><i class="bi bi-tags"></i> Categorías</a></li>
+                    <li><a href="/inventory/units" class="nav-item"><i class="bi bi-rulers"></i> Unidades de Medida</a></li>
                     <li class="nav-category">Compras</li>
-                    <li><a href="/purchases/page" class="nav-item">Registrar Compra</a></li>
-                    <li><a href="/purchases" class="nav-item">Listado de Compras</a></li>
-                    <li><a href="/suppliers" class="nav-item">Proveedores</a></li>
+                    <li><a href="/purchases/page" class="nav-item"><i class="bi bi-bag-plus"></i> Registrar Compra</a></li>
+                    <li><a href="/purchases" class="nav-item"><i class="bi bi-bag"></i> Listado de Compras</a></li>
+                    <li><a href="/suppliers" class="nav-item"><i class="bi bi-truck"></i> Proveedores</a></li>
                     <li class="nav-category">Ventas</li>
-                    <li><a href="/sales" class="nav-item">Listado de Ventas</a></li>
-                    <li><a href="/customers" class="nav-item">Clientes</a></li>
+                    <li><a href="/sales" class="nav-item"><i class="bi bi-receipt"></i> Listado de Ventas</a></li>
+                    <li><a href="/customers" class="nav-item"><i class="bi bi-people"></i> Clientes</a></li>
                     <li class="nav-category">Administración</li>
-                    <li><a href="/users" class="nav-item">Usuarios</a></li>
+                    <li><a href="/users" class="nav-item"><i class="bi bi-person-circle"></i> Usuarios</a></li>
                     <li class="nav-category">Reportes</li>
-                    <li><a href="/reports" class="nav-item">Ver Reportes</a></li>
+                    <li><a href="/reports" class="nav-item"><i class="bi bi-graph-up"></i> Ver Reportes</a></li>
                     <li>
                         <form th:action="@{/logout}" method="post" style="display: block;">
                             <button type="submit" class="nav-item logout-button">
-                                Salir
+                                <i class="bi bi-box-arrow-right"></i> Salir
                             </button>
                         </form>
                     </li>
