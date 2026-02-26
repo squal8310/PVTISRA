@@ -42,7 +42,9 @@ class HomeController(private val categoryRepository: CategoryRepository,
             sku = null,
             barcode = null,
             unitId = null,
-            stockLimit = null
+            stockLimit = null,
+            wholesalePrice = null,
+            minWholesaleQuantity = null
         ))
         model.addAttribute("categories", categoryRepository.findAll())
         model.addAttribute("suppliers", supplierRepository.findAll())

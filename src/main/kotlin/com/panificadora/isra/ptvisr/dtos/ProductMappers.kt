@@ -22,7 +22,9 @@ fun Product.toDto(): ProductDto {
         barcode = this.barcode,
         unitId = this.unitId,
         unitName = this.unit?.name,
-        stockLimit = this.stockLimit
+        stockLimit = this.stockLimit,
+        wholesalePrice = this.wholesalePrice, // Added
+        minWholesaleQuantity = this.minWholesaleQuantity // Added
     )
 }
 
@@ -47,6 +49,8 @@ fun ProductFormDto.toEntity(
         barcode = this.barcode,
         unit = unitOfMeasure,
         unitId = this.unitId,
-        stockLimit = this.stockLimit
+        stockLimit = this.stockLimit,
+        wholesalePrice = this.wholesalePrice, // Added
+        minWholesaleQuantity = this.minWholesaleQuantity // Added
     )
 }

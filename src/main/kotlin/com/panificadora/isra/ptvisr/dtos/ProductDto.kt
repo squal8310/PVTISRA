@@ -16,5 +16,7 @@ data class ProductDto(
     val barcode: String?,
     val unitId: Int?,
     val unitName: String?,
-    val stockLimit: Int?
+    val stockLimit: Int?,
+    val wholesalePrice: Double?, // Added
+    val minWholesaleQuantity: Int? // Added
 )

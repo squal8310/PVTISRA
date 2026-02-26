@@ -13,5 +13,7 @@ data class ProductFormDto(
     val sku: String?,
     val barcode: String?,
     val unitId: Int?,
-    val stockLimit: Int?
+    val stockLimit: Int?,
+    val wholesalePrice: Double?, // Added
+    val minWholesaleQuantity: Int? // Added
 )

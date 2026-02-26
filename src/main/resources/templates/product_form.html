@@ -72,7 +72,7 @@
                     <button class="tab-button" data-tab="mayoreo">Mayoreo</button>
                 </div>
 
-                <form th:action="@{/products}" th:object="${productForm}" method="post" class="product-form">
+                <form th:action="@{/products/new}" th:object="${productForm}" method="post" class="product-form">
                     <input type="hidden" th:field="*{id}" />
 
                     <div id="registro" class="tab-content active">
@@ -102,6 +102,10 @@
                             <input type="text" id="purchasePrice" th:field="*{purchasePrice}" />
                         </div>
                         <div class="form-group">
+                            <label for="stock">Stock Inicial:</label>
+                            <input type="text" id="stock" th:field="*{stock}" value="0" required />
+                        </div>
+                        <div class="form-group">
                             <label for="categoryId">Categoría:</label>
                             <select id="categoryId" th:field="*{categoryId}">
                                 <option value="">Seleccione una categoría</option>
@@ -122,21 +126,23 @@
                                 <option th:each="sup : ${suppliers}" th:value="${sup.id}" th:text="${sup.name}"></option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="imageUrl">URL de Imagen:</label>
-                            <input type="text" id="imageUrl" th:field="*{imageUrl}" />
                         </div>
-                    </div>
 
                     <div id="inventario" class="tab-content">
-                        <h2>Gestión de Inventario</h2>
-                        <div class="form-group">
-                            <label for="stock">Stock Actual:</label>
-                            <input type="text" id="stock" th:field="*{stock}" step="0.001" value="0" required />
-                        </div>
+                        <h2>Gestión de Inventario y Imagen</h2>
                         <div class="form-group">
                             <label for="stockLimit">Stock Mínimo (Alerta):</label>
                             <input type="text" id="stockLimit" th:field="*{stockLimit}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="productImageUpload">Subir Imagen del Producto:</label>
+                            <input type="file" id="productImageUpload" accept="image/*" />
+                            <div class="image-preview-container" style="margin-top: 10px; border: 1px solid #ddd; padding: 5px; max-width: 200px;">
+                                <img id="imagePreview" th:src="*{imageUrl} ? @{*{imageUrl}} : ''" alt="Previsualización de Imagen" style="max-width: 100%; height: auto; display: block;" />
+                                <p th:if="!*{imageUrl}" id="noImageText" style="text-align: center; color: #888;">No hay imagen seleccionada</p>
+                            </div>
+                            <button type="button" id="uploadImageBtn" class="btn btn-secondary" style="margin-top: 10px;">Subir Imagen</button>
+                            <input type="hidden" id="imageUrl" th:field="*{imageUrl}" /> <!-- Hidden field to store the URL -->
                         </div>
                     </div>
 
@@ -184,6 +190,91 @@
                     }
                 });
             });
+
+            // Image Upload Logic
+            const productImageUpload = document.getElementById('productImageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const noImageText = document.getElementById('noImageText');
+            const uploadImageBtn = document.getElementById('uploadImageBtn');
+            const hiddenImageUrlInput = document.getElementById('imageUrl'); // The hidden input for imageUrl
+
+            let selectedFile = null; // To store the file selected for upload
+
+            // Handle image preview
+            productImageUpload.addEventListener('change', function(event) {
+                selectedFile = event.target.files[0];
+                if (selectedFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        if (noImageText) noImageText.style.display = 'none';
+                        uploadImageBtn.disabled = false; // Enable upload button
+                    };
+                    reader.readAsDataURL(selectedFile);
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                    if (noImageText) noImageText.style.display = 'block';
+                    uploadImageBtn.disabled = true; // Disable upload button
+                }
+            });
+
+            // Handle image upload
+            uploadImageBtn.addEventListener('click', async function() {
+                if (!selectedFile) {
+                    alert('Por favor, selecciona una imagen para subir.');
+                    return;
+                }
+
+                // Get product ID and name from the form
+                const productId = document.getElementById('id').value; // Assuming 'id' is the hidden input for product ID
+                const productName = document.getElementById('name').value; // Assuming 'name' is the input for product name
+
+                if (!productId || !productName) {
+                    alert('Por favor, guarda el producto primero para obtener un ID y nombre.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('productId', productId);
+                formData.append('productName', productName);
+
+                try {
+                    // This endpoint needs to be created on the server-side (Kotlin/Spring Boot)
+                    const response = await fetch('/products/uploadImage', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert('Imagen subida exitosamente: ' + result.fileName);
+                        hiddenImageUrlInput.value = result.imageUrl; // Update the hidden field with the new URL
+                        // Optionally, update the image preview with the server-returned URL if different
+                        imagePreview.src = result.imageUrl;
+                    } else {
+                        const errorData = await response.json();
+                        alert('Error al subir la imagen: ' + (errorData.message || response.statusText));
+                        console.error('Error response:', errorData);
+                    }
+                } catch (error) {
+                    console.error('Error al conectar con el servidor para subir imagen:', error);
+                    alert('Error al conectar con el servidor para subir imagen. Intente de nuevo.');
+                }
+            });
+
+            // Initial state for upload button
+            uploadImageBtn.disabled = true;
+            // Hide noImageText if imageUrl is already present
+            if (imagePreview.src && imagePreview.src !== window.location.href) { // Check if src is not empty or default
+                if (noImageText) noImageText.style.display = 'none';
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'none';
+                if (noImageText) noImageText.style.display = 'block';
+            }
 
             // Numeric input masking for product form
             function enforcePositiveNumber(event) {

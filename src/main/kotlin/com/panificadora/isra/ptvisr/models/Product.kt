@@ -20,7 +20,7 @@ data class  Product(
     @Column(name = "supplier_id")
     var supplierId: Long?,
     @Column(name = "image_url")
-    val imageUrl: String?,
+    var imageUrl: String?,
     @Column(name = "purchase_price")
     val purchasePrice: Double?,
     val sku: String?,
@@ -30,5 +30,9 @@ data class  Product(
     @Column(name = "unit_id")
     var unitId: Int?,
     @Column(name = "stock_limit")
-    var stockLimit: Int?
+    var stockLimit: Int?,
+    @Column(name = "wholesale_price")
+    var wholesalePrice: Double?,
+    @Column(name = "min_wholesale_quantity")
+    var minWholesaleQuantity: Int?
 )
