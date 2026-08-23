@@ -430,3 +430,83 @@ body {
 .alert-close-btn:hover {
     opacity: 1;
 }
+
+/* Product List Table Styles */
+.product-list-container {
+    background-color: #F9F9F9;
+    padding: 15px;
+    border: 1px solid #DDD;
+    border-radius: 3px;
+    margin-top: 15px;
+    width: 100%; /* Make it span almost the entire content */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.search-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.search-area .form-control {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #CCC;
+    border-radius: 2px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #E0E0E0;
+    padding: 10px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #EAF2F8; /* Light blue header */
+    font-weight: bold;
+    color: #333;
+}
+
+/* Row styling */
+.data-table tbody tr:nth-child(odd) {
+    background-color: #F5F5F5; /* Light grey for odd rows */
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #FFFFFF; /* White for even rows */
+}
+
+.data-table tbody tr:hover {
+    background-color: #D0DCE8; /* Highlight on hover */
+    cursor: pointer;
+}
+
+.data-table td:last-child {
+    white-space: nowrap; /* Prevent action buttons from wrapping */
+}
+
+.data-table .btn-sm {
+    padding: 5px 8px;
+    font-size: 0.85em;
+    margin-right: 5px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.pagination-controls .btn {
+    padding: 8px 15px;
+}

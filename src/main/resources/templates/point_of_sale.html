@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTVISR - Punto de Venta</title>
-    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div th:fragment="content">
     <style>
         .pos-container {
             display: flex;
@@ -66,38 +67,27 @@
         #sale-items-table .quantity-input {
             width: 60px;
         }
-        .form-control {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        /* Basic Modal Styles */
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
         }
-
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; /* Could be more responsive */
+            width: 80%;
             max-width: 500px;
             border-radius: 8px;
             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -106,446 +96,332 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
+        .modal-header h2 { margin: 0; font-size: 1.5em; }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close-button:hover, .close-button:focus { color: black; text-decoration: none; cursor: pointer; }
         .modal-footer {
             border-top: 1px solid #eee;
             padding-top: 15px;
             margin-top: 20px;
             text-align: right;
         }
-
-        .modal-footer .btn {
-            margin-left: 10px;
-        }
-
-        /* New style for low stock */
-        .low-stock {
-            color: red;
-            font-weight: bold;
-        }
+        .modal-footer .btn { margin-left: 10px; }
+        .low-stock { color: red; font-weight: bold; }
     </style>
-</head>
-<body>
-<div class="container">
-       <main class="main-content">
-        <header class="main-header">
-            <h1>Punto de Venta</h1>
-        </header>
-        <section class="content-area">
-            <div class="pos-container">
-                <div class="pos-main">
-                    <div class="product-search-area">
-                        <div class="form-group product-autocomplete-group main-product-search">
-                            <label for="posProductNameInput">Buscar Producto:</label>
-                            <input type="text" id="posProductNameInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
-                            <div class="product-suggestions"></div>
-                        </div>
-                    </div>
-                    <table id="sale-items-table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Stock</th>
-                                <th>Cantidad</th>
-                                <th>Precio</th>
-                                <th>Importe</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Los productos agregados aparecerán aquí -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pos-sidebar">
-                    <div class="sale-summary">
-                        <div class="summary-item">
-                            <span>Subtotal:</span>
-                            <span id="summary-subtotal">$0.00</span>
-                        </div>
-                        <div class="summary-item">
-                            <span>IVA (16%):</span>
-                            <span id="summary-iva">$0.00</span>
-                        </div>
-                        <div class="summary-item summary-total">
-                            <span>Total:</span>
-                            <span id="summary-total">$0.00</span>
-                        </div>
-                        <div class="sale-actions">
-                            <button class="btn btn-primary" id="btn-pay">Cobrar</button>
-                            <button class="btn btn-danger" id="btn-cancel">Cancelar Venta</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
 
-<!-- Payment Modal -->
-<div id="paymentModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Confirmar Venta</h2>
-            <span class="close-button" id="closePaymentModal">&times;</span>
+    <h2 style="margin-bottom: 16px;">Punto de Venta</h2>
+
+    <div class="pos-container">
+        <div class="pos-main">
+            <div class="product-search-area">
+                <div class="form-group product-autocomplete-group main-product-search">
+                    <label for="posProductNameInput">Buscar Producto:</label>
+                    <input type="text" id="posProductNameInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
+                    <div class="product-suggestions"></div>
+                </div>
+            </div>
+            <table id="sale-items-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Importe</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <div class="modal-body">
-            <div class="summary-item">
-                <span>Subtotal:</span>
-                <span id="modal-subtotal">$0.00</span>
+        <div class="pos-sidebar">
+            <div class="sale-summary">
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>IVA (16%):</span>
+                    <span id="summary-iva">$0.00</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total:</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+                <div class="sale-actions">
+                    <button class="btn btn-primary" id="btn-pay">Cobrar</button>
+                    <button class="btn btn-danger" id="btn-cancel">Cancelar Venta</button>
+                </div>
             </div>
-            <!-- IVA comentado según la solicitud del usuario -->
-            <!-- <div class="summary-item">
-                <span>IVA (16%):</span>
-                <span id="modal-iva">$0.00</span>
-            </div> -->
-            <div class="summary-item summary-total">
-                <span>Total a Pagar:</span>
-                <span id="modal-total">$0.00</span>
-            </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label for="amountReceived">Monto Recibido:</label>
-                <input type="number" id="amountReceived" class="form-control" step="0.01" min="0" value="0.00">
-            </div>
-            <div class="summary-item" style="margin-top: 10px;">
-                <span>Cambio:</span>
-                <span id="modal-change">$0.00</span>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" id="confirmSaleBtn">Confirmar Venta</button>
-            <button class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
         </div>
     </div>
-</div>
 
-<script>
-/*<![CDATA[*/
-document.addEventListener('DOMContentLoaded', function() {
-    const productNameInput = document.getElementById('posProductNameInput');
-    const productSuggestionsDiv = productNameInput.nextElementSibling;
-    const saleItemsTbody = document.querySelector('#sale-items-table tbody');
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmar Venta</h2>
+                <span class="close-button" id="closePaymentModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span id="modal-subtotal">$0.00</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total a Pagar:</span>
+                    <span id="modal-total">$0.00</span>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="amountReceived">Monto Recibido:</label>
+                    <input type="number" id="amountReceived" class="form-control" step="0.01" min="0" value="0.00">
+                </div>
+                <div class="summary-item" style="margin-top: 10px;">
+                    <span>Cambio:</span>
+                    <span id="modal-change">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="confirmSaleBtn">Confirmar Venta</button>
+                <button class="btn btn-secondary" id="cancelPaymentBtn">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-    const summarySubtotal = document.getElementById('summary-subtotal');
-    const summaryIva = document.getElementById('summary-iva');
-    const summaryTotal = document.getElementById('summary-total');
-    
-    const btnCancel = document.getElementById('btn-cancel');
-    const btnPay = document.getElementById('btn-pay'); // Get the pay button
+    <script>
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        const productNameInput    = document.getElementById('posProductNameInput');
+        const productSuggestionsDiv = productNameInput.nextElementSibling;
+        const saleItemsTbody      = document.querySelector('#sale-items-table tbody');
+        const summarySubtotal     = document.getElementById('summary-subtotal');
+        const summaryIva          = document.getElementById('summary-iva');
+        const summaryTotal        = document.getElementById('summary-total');
+        const btnCancel           = document.getElementById('btn-cancel');
+        const btnPay              = document.getElementById('btn-pay');
+        const paymentModal        = document.getElementById('paymentModal');
+        const closePaymentModal   = document.getElementById('closePaymentModal');
+        const cancelPaymentBtn    = document.getElementById('cancelPaymentBtn');
+        const confirmSaleBtn      = document.getElementById('confirmSaleBtn');
+        const modalSubtotal       = document.getElementById('modal-subtotal');
+        const modalTotal          = document.getElementById('modal-total');
+        const amountReceivedInput = document.getElementById('amountReceived');
+        const modalChange         = document.getElementById('modal-change');
 
-    // Modal elements
-    const paymentModal = document.getElementById('paymentModal');
-    const closePaymentModal = document.getElementById('closePaymentModal');
-    const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-    const confirmSaleBtn = document.getElementById('confirmSaleBtn');
-    const modalSubtotal = document.getElementById('modal-subtotal');
-    // const modalIva = document.getElementById('modal-iva'); // Commented out
-    const modalTotal = document.getElementById('modal-total');
-    const amountReceivedInput = document.getElementById('amountReceived');
-    const modalChange = document.getElementById('modal-change');
+        let saleItems = [];
 
-
-    let saleItems = [];
-
-    function addProductToSale(product) {
-        if (product.stock <= 0) {
-            alert('Producto sin stock disponible.');
-            return;
-        }
-
-        const existingItem = saleItems.find(item => item.id === product.id);
-
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            saleItems.push({
-                id: product.id,
-                name: product.name,
-                quantity: 1,
-                price: product.price,
-                stock: product.stock,
-                stockLimit: product.stockLimit // Add stockLimit here
-            });
-        }
-        renderSaleItems();
-        updateSummary();
-    }
-
-    function renderSaleItems() {
-        saleItemsTbody.innerHTML = '';
-        saleItems.forEach((item, index) => {
-            const stockClass = (item.stockLimit !== null && item.stock <= item.stockLimit) ? 'low-stock' : '';
-            const row = document.createElement('tr');
-            row.dataset.index = index;
-            row.innerHTML = `
-                <td>${item.name}</td>
-                <td><span class="${stockClass}">${item.stock}</span></td>
-                <td><input type="text" class="quantity-input" value="${item.quantity}"></td>
-                <td>${item.price.toFixed(2)}</td>
-                <td>${(item.quantity * item.price).toFixed(2)}</td>
-                <td><button class="btn btn-remove-item">Eliminar</button></td>
-            `;
-            saleItemsTbody.appendChild(row);
-        });
-    }
-
-    function updateSummary() {
-        const subtotal = saleItems.reduce((acc, item) => acc + (item.quantity * item.price), 0);
-        // const iva = subtotal * 0.16; // IVA commented out as per user request
-        const iva = 0.0; // Set IVA to 0
-        const total = subtotal + iva; // Total is now just subtotal
-
-        summarySubtotal.textContent = `$${subtotal.toFixed(2)}`;
-        // summaryIva.textContent = `$${iva.toFixed(2)}`; // IVA display commented out
-        summaryTotal.textContent = `$${total.toFixed(2)}`;
-    }
-
-    function clearSale() {
-        saleItems = [];
-        renderSaleItems();
-        updateSummary();
-    }
-
-    let debounceTimer;
-    productNameInput.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        const searchTerm = this.value.trim(); // Trim whitespace
-        if (searchTerm.length < 2) { // Minimum length for search
-            productSuggestionsDiv.innerHTML = '';
-            return;
-        }
-
-        debounceTimer = setTimeout(() => {
-            const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/; // EAN-like barcode patterns
-            let url = `/products/search?`;
-            const isBarcodeSearch = eanRegex.test(searchTerm); // Flag to know if it was a barcode search
-
-            if (isBarcodeSearch) {
-                url += `barcode=${searchTerm}`;
-            } else {
-                url += `searchTerm=${searchTerm}`;
+        function addProductToSale(product) {
+            if (product.stock <= 0) {
+                alert('Producto sin stock disponible.');
+                return;
             }
-
-            fetch(url)
-                .then(response => response.json())
-                .then(products => {
-                    productSuggestionsDiv.innerHTML = '';
-                    if (products.length > 0) {
-                        if (isBarcodeSearch) { // If it's a barcode search and at least one product is found, add the first one directly
-                            if (products[0].stock <= 0) {
-                                alert('Producto sin stock disponible.');
-                                productNameInput.value = ''; // Clear input
-                                productSuggestionsDiv.innerHTML = ''; // Clear suggestions
-                                productNameInput.focus(); // Keep focus for next scan
-                                return;
-                            }
-                            addProductToSale(products[0]);
-                            productNameInput.value = ''; // Clear input
-                            productSuggestionsDiv.innerHTML = ''; // Clear suggestions
-                            productNameInput.focus(); // Keep focus for next scan
-                        } else {
-                            // Otherwise (name search), display suggestions as usual
-                            products.forEach(product => {
-                                if (product.stock <= 0) {
-                                    // Skip adding to suggestions if stock is 0
-                                    return;
-                                }
-                                const suggestionItem = document.createElement('div');
-                                suggestionItem.classList.add('suggestion-item');
-                                suggestionItem.textContent = `${product.name} - ${product.price.toFixed(2)}`;
-                                suggestionItem.addEventListener('click', function() {
-                                    addProductToSale(product);
-                                    productNameInput.value = '';
-                                    productSuggestionsDiv.innerHTML = '';
-                                    productNameInput.focus();
-                                });
-                                productSuggestionsDiv.appendChild(suggestionItem);
-                            });
-                        }
-                    } else {
-                        productSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching products:', error);
-                    productSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar.</div>';
+            const existingItem = saleItems.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                saleItems.push({
+                    id: product.id,
+                    name: product.name,
+                    quantity: 1,
+                    price: product.price,
+                    stock: product.stock,
+                    stockLimit: product.stockLimit
                 });
-        }, 300);
-    });
-    
-    productNameInput.addEventListener('blur', function() {
-        setTimeout(() => {
-            productSuggestionsDiv.innerHTML = '';
-        }, 200);
-    });
-
-    saleItemsTbody.addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-remove-item')) {
-            const rowIndex = e.target.closest('tr').dataset.index;
-            saleItems.splice(rowIndex, 1);
+            }
             renderSaleItems();
             updateSummary();
         }
-    });
 
-    saleItemsTbody.addEventListener('input', function(e) {
-        if (e.target.classList.contains('quantity-input')) {
-            const row = e.target.closest('tr');
-            if (!row) return;
+        function renderSaleItems() {
+            saleItemsTbody.innerHTML = '';
+            saleItems.forEach((item, index) => {
+                const stockClass = (item.stockLimit !== null && item.stock <= item.stockLimit) ? 'low-stock' : '';
+                const row = document.createElement('tr');
+                row.dataset.index = index;
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td><span class="${stockClass}">${item.stock}</span></td>
+                    <td><input type="text" class="quantity-input" value="${item.quantity}"></td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${(item.quantity * item.price).toFixed(2)}</td>
+                    <td><button class="btn btn-remove-item">Eliminar</button></td>
+                `;
+                saleItemsTbody.appendChild(row);
+            });
+        }
 
-            const rowIndex = row.dataset.index;
-            const item = saleItems[rowIndex];
-            let value = e.target.value;
+        function updateSummary() {
+            const subtotal = saleItems.reduce((acc, item) => acc + (item.quantity * item.price), 0);
+            const total = subtotal;
+            summarySubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            summaryTotal.textContent    = `$${total.toFixed(2)}`;
+        }
 
-            // Clean input to allow only non-negative integers
-            value = value.replace(/\D/g, '');
-
-            let newQuantity = parseInt(value, 10);
-
-            // If input is empty or not a valid number, treat as 0
-            if (isNaN(newQuantity)) {
-                newQuantity = 0;
-                e.target.value = ''; // Keep input empty
-            } else {
-                 // Check against stock
-                if (newQuantity > item.stock) {
-                    newQuantity = item.stock;
-                }
-                // Update input value to reflect cleaned/capped number.
-                // This also handles removing leading zeros (e.g., "05" -> "5")
-                e.target.value = newQuantity;
-            }
-            
-            // Handle case where input becomes empty/zero
-            if (newQuantity === 0) {
-                 e.target.value = '';
-            }
-
-            item.quantity = newQuantity;
-
-            // Update line total and summary
-            row.querySelector('td:nth-child(5)').textContent = (item.quantity * item.price).toFixed(2);
+        function clearSale() {
+            saleItems = [];
+            renderSaleItems();
             updateSummary();
         }
-    });
 
-    btnCancel.addEventListener('click', function() {
-        if (confirm('¿Está seguro de que desea cancelar la venta actual?')) {
-            clearSale();
-        }
-    });
-
-    // Event listener for the "Cobrar" button (opens modal)
-    btnPay.addEventListener('click', function() {
-        if (saleItems.length === 0) {
-            alert('No hay productos en el carrito para cobrar.');
-            return;
-        }
-
-        const currentSubtotal = parseFloat(summarySubtotal.textContent.replace('$', ''));
-        const currentTotal = parseFloat(summaryTotal.textContent.replace('$', ''));
-
-        modalSubtotal.textContent = `$${currentSubtotal.toFixed(2)}`;
-        // modalIva.textContent = `$${(currentTotal - currentSubtotal).toFixed(2)}`; // IVA commented out
-        modalTotal.textContent = `$${currentTotal.toFixed(2)}`;
-        
-        amountReceivedInput.value = currentTotal.toFixed(2); // Pre-fill with total
-        updateChange(); // Calculate initial change
-
-        paymentModal.style.display = 'block';
-        amountReceivedInput.focus();
-    });
-
-    // Modal close buttons
-    closePaymentModal.addEventListener('click', function() {
-        paymentModal.style.display = 'none';
-    });
-
-    cancelPaymentBtn.addEventListener('click', function() {
-        paymentModal.style.display = 'none';
-    });
-
-    // Calculate change dynamically
-    amountReceivedInput.addEventListener('input', updateChange);
-
-    function updateChange() {
-        const totalToPay = parseFloat(modalTotal.textContent.replace('$', ''));
-        const amountReceived = parseFloat(amountReceivedInput.value) || 0;
-        const change = amountReceived - totalToPay;
-        modalChange.textContent = `$${change.toFixed(2)}`;
-
-        // Optional: Disable confirm button if amount received is less than total
-        if (change < 0) {
-            confirmSaleBtn.disabled = true;
-            modalChange.style.color = 'red';
-        } else {
-            confirmSaleBtn.disabled = false;
-            modalChange.style.color = 'green';
-        }
-    }
-
-    // Confirm Sale button inside modal
-    confirmSaleBtn.addEventListener('click', async function() {
-        const totalToPay = parseFloat(modalTotal.textContent.replace('$', ''));
-        const amountReceived = parseFloat(amountReceivedInput.value) || 0;
-
-        if (amountReceived < totalToPay) {
-            alert('El monto recibido es insuficiente.');
-            return;
-        }
-
-        const saleDetailsDto = saleItems.map(item => ({
-            productId: item.id,
-            quantity: item.quantity,
-            unitPrice: item.price
-        }));
-
-        try {
-            const response = await fetch('/sales', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ details: saleDetailsDto })
-            });
-
-            if (response.ok) {
-                const sale = await response.json();
-                alert(`Venta registrada con éxito! ID de Venta: ${sale.id}`);
-                paymentModal.style.display = 'none'; // Close modal
-                clearSale();
-            } else {
-                const errorData = await response.json();
-                alert(`Error al registrar la venta: ${errorData.message || response.statusText}`);
-                console.error('Error response:', errorData);
+        let debounceTimer;
+        productNameInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const searchTerm = this.value.trim();
+            if (searchTerm.length < 2) {
+                productSuggestionsDiv.innerHTML = '';
+                return;
             }
-        } catch (error) {
-            console.error('Error al conectar con el servidor:', error);
-            alert('Error al conectar con el servidor. Intente de nuevo.');
-        }
-    });
+            debounceTimer = setTimeout(() => {
+                const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/;
+                const isBarcodeSearch = eanRegex.test(searchTerm);
+                const params = new URLSearchParams(isBarcodeSearch
+                    ? { barcode: searchTerm }
+                    : { searchTerm: searchTerm });
 
-});
-/*]]>*/
-</script>
+                fetch('/products/search?' + params)
+                    .then(res => res.json())
+                    .then(data => {
+                        const products = data.content;
+                        productSuggestionsDiv.innerHTML = '';
+                        if (products.length > 0) {
+                            if (isBarcodeSearch) {
+                                if (products[0].stock <= 0) {
+                                    alert('Producto sin stock disponible.');
+                                    productNameInput.value = '';
+                                    productNameInput.focus();
+                                    return;
+                                }
+                                addProductToSale(products[0]);
+                                productNameInput.value = '';
+                                productNameInput.focus();
+                            } else {
+                                products.forEach(product => {
+                                    if (product.stock <= 0) return;
+                                    const item = document.createElement('div');
+                                    item.classList.add('suggestion-item');
+                                    item.textContent = `${product.name} - ${product.price.toFixed(2)}`;
+                                    item.addEventListener('click', function() {
+                                        addProductToSale(product);
+                                        productNameInput.value = '';
+                                        productSuggestionsDiv.innerHTML = '';
+                                        productNameInput.focus();
+                                    });
+                                    productSuggestionsDiv.appendChild(item);
+                                });
+                            }
+                        } else {
+                            productSuggestionsDiv.innerHTML = '<div class="no-suggestions">No se encontraron productos.</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching products:', error);
+                        productSuggestionsDiv.innerHTML = '<div class="no-suggestions">Error al buscar.</div>';
+                    });
+            }, 300);
+        });
+
+        productNameInput.addEventListener('blur', function() {
+            setTimeout(() => { productSuggestionsDiv.innerHTML = ''; }, 200);
+        });
+
+        saleItemsTbody.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-remove-item')) {
+                const rowIndex = e.target.closest('tr').dataset.index;
+                saleItems.splice(rowIndex, 1);
+                renderSaleItems();
+                updateSummary();
+            }
+        });
+
+        saleItemsTbody.addEventListener('input', function(e) {
+            if (e.target.classList.contains('quantity-input')) {
+                const row = e.target.closest('tr');
+                if (!row) return;
+                const item = saleItems[row.dataset.index];
+                let value = e.target.value.replace(/\D/g, '');
+                let newQuantity = parseInt(value, 10);
+                if (isNaN(newQuantity)) {
+                    newQuantity = 0;
+                    e.target.value = '';
+                } else {
+                    if (newQuantity > item.stock) newQuantity = item.stock;
+                    e.target.value = newQuantity;
+                }
+                if (newQuantity === 0) e.target.value = '';
+                item.quantity = newQuantity;
+                row.querySelector('td:nth-child(5)').textContent = (item.quantity * item.price).toFixed(2);
+                updateSummary();
+            }
+        });
+
+        btnCancel.addEventListener('click', function() {
+            if (confirm('¿Está seguro de que desea cancelar la venta actual?')) clearSale();
+        });
+
+        btnPay.addEventListener('click', function() {
+            if (saleItems.length === 0) {
+                alert('No hay productos en el carrito para cobrar.');
+                return;
+            }
+            const currentSubtotal = parseFloat(summarySubtotal.textContent.replace('$', ''));
+            const currentTotal    = parseFloat(summaryTotal.textContent.replace('$', ''));
+            modalSubtotal.textContent = `$${currentSubtotal.toFixed(2)}`;
+            modalTotal.textContent    = `$${currentTotal.toFixed(2)}`;
+            amountReceivedInput.value = currentTotal.toFixed(2);
+            updateChange();
+            paymentModal.style.display = 'block';
+            amountReceivedInput.focus();
+        });
+
+        closePaymentModal.addEventListener('click',  function() { paymentModal.style.display = 'none'; });
+        cancelPaymentBtn.addEventListener('click',   function() { paymentModal.style.display = 'none'; });
+        amountReceivedInput.addEventListener('input', updateChange);
+
+        function updateChange() {
+            const totalToPay     = parseFloat(modalTotal.textContent.replace('$', ''));
+            const amountReceived = parseFloat(amountReceivedInput.value) || 0;
+            const change         = amountReceived - totalToPay;
+            modalChange.textContent = `$${change.toFixed(2)}`;
+            confirmSaleBtn.disabled = change < 0;
+            modalChange.style.color = change < 0 ? 'red' : 'green';
+        }
+
+        confirmSaleBtn.addEventListener('click', async function() {
+            const totalToPay     = parseFloat(modalTotal.textContent.replace('$', ''));
+            const amountReceived = parseFloat(amountReceivedInput.value) || 0;
+            if (amountReceived < totalToPay) {
+                alert('El monto recibido es insuficiente.');
+                return;
+            }
+            const saleDetailsDto = saleItems.map(item => ({
+                productId: item.id,
+                quantity:  item.quantity,
+                unitPrice: item.price
+            }));
+            try {
+                const response = await fetch('/sales', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ details: saleDetailsDto })
+                });
+                if (response.ok) {
+                    const sale = await response.json();
+                    alert(`Venta registrada con éxito! ID de Venta: ${sale.id}`);
+                    paymentModal.style.display = 'none';
+                    clearSale();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error al registrar la venta: ${errorData.message || response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error al conectar con el servidor:', error);
+                alert('Error al conectar con el servidor. Intente de nuevo.');
+            }
+        });
+    });
+    /*]]>*/
+    </script>
+</div>
+
 </body>
 </html>

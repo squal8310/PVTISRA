@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div th:fragment="content">
+    <style>
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        .tab-button {
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: 0.3s;
+            font-size: 16px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            margin-right: 2px;
+        }
+        .tab-button:hover { background-color: #ddd; }
+        .tab-button.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+            font-weight: bold;
+        }
+        .tab-content { display: none; padding: 20px 0; }
+        .tab-content.active { display: block; }
+        .tab-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4682B4;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+        .product-form { background-color: transparent; border: none; padding: 0; }
+    </style>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+        <a th:href="@{/inventory/products}" class="btn btn-secondary">&larr; Regresar</a>
+        <h2 style="margin:0;" th:text="${productForm.id != null && productForm.id != 0} ? 'Editar Producto' : 'Registrar Producto'">Registrar Producto</h2>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success">
+        <p th:text="${successMessage}"></p>
+        <button type="button" class="alert-close-btn">X</button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+        <button type="button" class="alert-close-btn">X</button>
+    </div>
+
+    <div class="tab-buttons" th:if="${productForm.id != null && productForm.id != 0}">
+        <button class="tab-button active" data-tab="registro">Registro Artículo</button>
+        <button class="tab-button" data-tab="inventario">Inventario</button>
+        <button class="tab-button" data-tab="mayoreo">Mayoreo</button>
+    </div>
+
+    <form th:action="${productForm.id != null && productForm.id != 0} ? @{/products/edit/{id}(id=${productForm.id})} : @{/products/new}"
+          th:object="${productForm}" method="post" class="product-form"
+          th:enctype="${productForm.id != null && productForm.id != 0} ? 'multipart/form-data' : 'application/x-www-form-urlencoded'">
+        <input type="hidden" th:field="*{id}" />
+
+        <div id="registro" class="tab-content active">
+            <h2>Registro de Artículo</h2>
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" th:field="*{name}" required />
+            </div>
+            <div class="form-group">
+                <label for="description">Descripción:</label>
+                <textarea id="description" th:field="*{description}"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="sku">SKU:</label>
+                <input type="text" id="sku" th:field="*{sku}" />
+            </div>
+            <div class="form-group">
+                <label for="barcode">Código de Barras:</label>
+                <input type="text" id="barcode" th:field="*{barcode}" />
+            </div>
+            <div class="form-group">
+                <label for="price">Precio de Venta:</label>
+                <input type="text" id="price" th:field="*{price}" required />
+            </div>
+            <div class="form-group">
+                <label for="purchasePrice">Precio de Compra:</label>
+                <input type="text" id="purchasePrice" th:field="*{purchasePrice}" />
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock:</label>
+                <input type="text" id="stock" th:field="*{stock}" required />
+            </div>
+            <div class="form-group">
+                <label for="categoryId">Categoría:</label>
+                <select id="categoryId" th:field="*{categoryId}">
+                    <option value="">Seleccione una categoría</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="unitId">Unidad de Medida:</label>
+                <select id="unitId" th:field="*{unitId}">
+                    <option value="">Seleccione una unidad</option>
+                    <option th:each="uom : ${unitsOfMeasure}" th:value="${uom.id}" th:text="${uom.name}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="supplierId">Proveedor:</label>
+                <select id="supplierId" th:field="*{supplierId}">
+                    <option value="">Seleccione un proveedor</option>
+                    <option th:each="sup : ${suppliers}" th:value="${sup.id}" th:text="${sup.name}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div id="inventario" class="tab-content" th:if="${productForm.id != null && productForm.id != 0}">
+            <h2>Gestión de Inventario e Imagen</h2>
+            <div class="form-group">
+                <label for="stockLimit">Stock Mínimo (Alerta):</label>
+                <input type="text" id="stockLimit" th:field="*{stockLimit}" />
+            </div>
+            <div class="form-group">
+                <label for="productImageUpload">Subir Imagen del Producto:</label>
+                <input type="file" id="productImageUpload" accept="image/*" name="productImage" />
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">ℹ️ Tamaño máximo: 10 MB</p>
+                <div id="fileSizeWarning" class="alert alert-warning" style="margin-top: 8px; display: none;">
+                    <p id="fileSizeWarningText"></p>
+                </div>
+                <div class="image-preview-container" style="margin-top:10px; border:1px solid #ddd; padding:5px; max-width:200px;">
+                    <img id="imagePreview" th:src="*{imageUrl} ? @{*{imageUrl}} : ''" alt="Previsualización"
+                         style="max-width:100%; height:auto; display:block;" />
+                    <p th:if="!*{imageUrl}" id="noImageText" style="text-align:center; color:#888;">No hay imagen seleccionada</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="mayoreo" class="tab-content" th:if="${productForm.id != null && productForm.id != 0}">
+            <h2>Precios de Mayoreo</h2>
+            <div class="form-group">
+                <label for="wholesalePrice">Precio de Mayoreo:</label>
+                <input type="text" id="wholesalePrice" th:field="*{wholesalePrice}" />
+            </div>
+            <div class="form-group">
+                <label for="minWholesaleQuantity">Cantidad Mínima para Mayoreo:</label>
+                <input type="text" id="minWholesaleQuantity" th:field="*{minWholesaleQuantity}" />
+            </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; gap:8px;">
+            <button type="submit" class="btn btn-primary"
+                    th:text="${productForm.id != 0} ? 'Actualizar Producto' : 'Crear Producto'">Guardar Producto</button>
+            <a th:href="@{/inventory/products}" class="btn btn-secondary">Cancelar</a>
+        </div>
+
+        <p th:if="${isCreating}" style="margin-top:12px; font-size:13px; color:#666;">
+            💡 Tip: Después de crear el producto podrás editarlo para agregar imagen, precios de mayoreo y más detalles.
+        </p>
+    </form>
+
+    <script>
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab logic
+        const tabButtons  = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                tabButtons.forEach(function(b)  { b.classList.remove('active'); });
+                tabContents.forEach(function(c) { c.classList.remove('active'); });
+                button.classList.add('active');
+                const target = document.getElementById(button.dataset.tab);
+                if (target) target.classList.add('active');
+            });
+        });
+
+        // Image preview
+        const productImageUpload = document.getElementById('productImageUpload');
+        const imagePreview       = document.getElementById('imagePreview');
+        const noImageText        = document.getElementById('noImageText');
+        const fileSizeWarning    = document.getElementById('fileSizeWarning');
+        const fileSizeWarningText = document.getElementById('fileSizeWarningText');
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+        if (productImageUpload && imagePreview) {
+            productImageUpload.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Validate file size
+                    if (file.size > MAX_FILE_SIZE) {
+                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        fileSizeWarningText.textContent = `El archivo es muy grande (${fileSizeMB} MB). El tamaño máximo permitido es 10 MB.`;
+                        fileSizeWarning.style.display = 'block';
+                        imagePreview.src = '';
+                        imagePreview.style.display = 'none';
+                        if (noImageText) noImageText.style.display = 'block';
+                        productImageUpload.value = ''; // Clear the file input
+                        return;
+                    }
+                    fileSizeWarning.style.display = 'none';
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        if (noImageText) noImageText.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                    if (noImageText) noImageText.style.display = 'block';
+                    fileSizeWarning.style.display = 'none';
+                }
+            });
+
+            if (imagePreview.src && imagePreview.src !== window.location.href) {
+                imagePreview.style.display = 'block';
+                if (noImageText) noImageText.style.display = 'none';
+            } else {
+                imagePreview.style.display = 'none';
+                if (noImageText) noImageText.style.display = 'block';
+            }
+        }
+
+        // Numeric input masking
+        function enforcePositiveNumber(event) {
+            let value = event.target.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+            if (value.length > 1 && value.startsWith('0') && !value.startsWith('0.')) value = value.substring(1);
+            const num = parseFloat(value);
+            event.target.value = (isNaN(num) || num <= 0) ? '' : value;
+        }
+
+        function enforcePositiveInteger(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            if (value.length > 1 && value.startsWith('0')) value = parseInt(value, 10).toString();
+            const num = parseInt(value, 10);
+            event.target.value = (isNaN(num) || num < 1) ? '' : num.toString();
+        }
+
+        [
+            { id: 'price',                handler: enforcePositiveNumber  },
+            { id: 'purchasePrice',        handler: enforcePositiveNumber  },
+            { id: 'stock',                handler: enforcePositiveNumber  },
+            { id: 'stockLimit',           handler: enforcePositiveNumber  },
+            { id: 'wholesalePrice',       handler: enforcePositiveNumber  },
+            { id: 'minWholesaleQuantity', handler: enforcePositiveInteger }
+        ].forEach(function(cfg) {
+            const el = document.getElementById(cfg.id);
+            if (el) el.addEventListener('input', cfg.handler);
+        });
+
+        // Form submission with fetch for better error handling
+        const form = document.querySelector('.product-form');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const fileInput = document.getElementById('productImageUpload');
+
+                // Client-side file size validation
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (file.size > MAX_FILE_SIZE) {
+                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        showErrorMessage(`El archivo (${fileSizeMB} MB) excede el tamaño máximo permitido de 10 MB. Por favor, selecciona una imagen más pequeña.`);
+                        return false;
+                    }
+                }
+
+                // Submit form using fetch
+                const formData = new FormData(form);
+                const action = form.getAttribute('action');
+                const method = form.getAttribute('method').toUpperCase();
+
+                fetch(action, {
+                    method: method,
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Success - redirect
+                        window.location.href = '/inventory/products';
+                    } else if (response.status === 413) {
+                        // Payload Too Large
+                        response.json().then(data => {
+                            showErrorMessage(data.error || 'El archivo es demasiado grande.');
+                        });
+                    } else {
+                        // Other HTTP errors
+                        response.text().then(text => {
+                            showErrorMessage('Error al guardar: ' + (text || response.statusText));
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorMessage('Error de red: ' + error.message);
+                });
+            });
+
+            function showErrorMessage(message) {
+                const alertDivs = document.querySelectorAll('.alert');
+                alertDivs.forEach(div => div.remove());
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.innerHTML = `<p>${message}</p>
+                                     <button type="button" class="alert-close-btn">X</button>`;
+                form.parentElement.insertBefore(errorDiv, form);
+
+                errorDiv.querySelector('.alert-close-btn').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+
+                window.scrollTo(0, 0);
+            }
+        }
+    });
+    /*]]>*/
+    </script>
+</div>
+
+</body>
+</html>

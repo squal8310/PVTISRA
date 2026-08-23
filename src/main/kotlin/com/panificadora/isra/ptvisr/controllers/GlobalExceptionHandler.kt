@@ -1,48 +1,39 @@
 package com.panificadora.isra.ptvisr.controllers
 
-import com.panificadora.isra.ptvisr.dtos.ErrorResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
-import java.time.LocalDateTime
+import org.springframework.web.multipart.MaxUploadSizeExceededException
+import org.springframework.ui.Model
 
 @ControllerAdvice
 class GlobalExceptionHandler {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgumentException(
-        ex: IllegalArgumentException,
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun handleMaxUploadSizeExceededException(
+        ex: MaxUploadSizeExceededException,
         request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn("Bad Request: ${ex.message}", ex) // Log with WARN level for client-side errors
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.BAD_REQUEST.value(),
-            error = "Bad Request",
-            message = ex.message,
-            path = request.getDescription(false).replace("uri=", "")
+    ): ResponseEntity<Map<String, String>> {
+        logger.warn("Upload size exceeded [${request.getDescription(false)}]: ${ex.message}", ex)
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(
+            mapOf("error" to "El archivo es muy grande. El tamaño máximo permitido es 10 MB.")
         )
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException, request: WebRequest): String {
+        logger.warn("Bad Request [${request.getDescription(false)}]: ${ex.message}", ex)
+        return "layout :: mainPage(page='dashboard', fragment='content')"
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleAllExceptions(
-        ex: Exception,
-        request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        logger.error("Internal Server Error: ${ex.message}", ex) // Log with ERROR level for server errors
-        val errorResponse = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            error = "Internal Server Error",
-            message = "An unexpected error occurred. Please try again later.",
-            path = request.getDescription(false).replace("uri=", "")
-        )
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleAllExceptions(ex: Exception, request: WebRequest): String {
+        logger.error("Internal Server Error [${request.getDescription(false)}]: ${ex.message}", ex)
+        return "layout :: mainPage(page='dashboard', fragment='content')"
     }
 }

@@ -1,14 +1,16 @@
 package com.panificadora.isra.ptvisr.config
 
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
+import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-class WebConfig : WebMvcConfigurer {
-
-    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/images/**")
-            .addResourceLocations("file:///C:/ptv/images/")
+class WebConfig : WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+    override fun customize(factory: TomcatServletWebServerFactory) {
+        factory.addConnectorCustomizers { connector ->
+            // Increase the maximum file upload size limit
+            connector.setProperty("maxHttpFormPostSize", "12582912") // 12MB in bytes
+            connector.setProperty("maxConnections", "200")
+        }
     }
 }

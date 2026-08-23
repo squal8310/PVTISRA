@@ -1,65 +1,56 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTVISR - Registrar Compra</title>
-    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="container">
-    <main class="main-content">
-        <header class="main-header">
-            <h1>Registrar Compra</h1>
-        </header>
-        <section class="content-area">
-            <div th:if="${successMessage}" class="alert alert-success">
-                <p th:text="${successMessage}"></p>
-                <button type="button" class="alert-close-btn">X</button>
+
+<div th:fragment="content">
+
+    <div th:if="${successMessage}" class="alert alert-success">
+        <p th:text="${successMessage}"></p>
+        <button type="button" class="alert-close-btn">X</button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+        <button type="button" class="alert-close-btn">X</button>
+    </div>
+
+    <h2 style="margin-bottom: 16px;">Registrar Compra</h2>
+
+    <form th:action="@{/purchases/new}" th:object="${purchaseFormDto}" method="post" class="purchase-form">
+        <div class="product-search-area">
+            <div class="form-group product-autocomplete-group main-product-search">
+                <label for="productSearchInput">Buscar Producto (Nombre o Código de Barras):</label>
+                <input type="text" id="productSearchInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
+                <div class="product-suggestions"></div>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger">
-                <p th:text="${errorMessage}"></p>
-                <button type="button" class="alert-close-btn">X</button>
-            </div>
-
-            <form th:action="@{/purchases/new}" th:object="${purchaseFormDto}" method="post" class="purchase-form">
-                <h2>Detalles de la Compra</h2>
-                <div class="product-search-area">
-                    <div class="form-group product-autocomplete-group main-product-search">
-                        <label for="productSearchInput">Buscar Producto (Nombre o Código de Barras):</label>
-                        <input type="text" id="productSearchInput" class="product-name-input" placeholder="Escribe el nombre o código de barras" />
-                        <div class="product-suggestions"></div>
-                    </div>
-                </div>
-
-                <div id="purchase-details-rows">
-                    <!-- Dynamically added product rows will appear here -->
-                </div>
-                
-                <div class="form-group total-section">
-                    <label for="total">Total:</label>
-                    <input type="text" id="total" name="total" value="0.00" readonly />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Registrar Compra</button>
-
-                <div class="form-group" style="margin-top: 15px; text-align: right;">
-                    <button type="button" class="btn btn-secondary btn-add-new-product" id="openNewProductModalBtn" disabled>Nuevo Producto</button>
-                </div>
-            </form>
-        </section>
-    </main>
-</div>
-
-<!-- New Product Modal -->
-<div id="newProductModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Registrar Nuevo Producto</h2>
-            <span class="close-button">&times;</span>
         </div>
-        <form id="newProductForm">
-            <div class="modal-body">
+
+        <div id="purchase-details-rows">
+            <!-- Dynamically added product rows will appear here -->
+        </div>
+
+        <div class="form-group total-section">
+            <label for="total">Total:</label>
+            <input type="text" id="total" name="total" value="0.00" readonly />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar Compra</button>
+
+        <div class="form-group" style="margin-top: 15px; text-align: right;">
+            <button type="button" class="btn btn-secondary btn-add-new-product" id="openNewProductModalBtn" disabled>Nuevo Producto</button>
+        </div>
+    </form>
+
+    <!-- New Product Modal -->
+    <div id="newProductModal" class="modal" style="display:none; position:fixed; z-index:1; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.4);">
+        <div style="background:#fefefe; margin:10% auto; padding:20px; border:1px solid #888; width:80%; max-width:550px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="margin:0;">Registrar Nuevo Producto</h2>
+                <span id="closeNewProductModal" style="color:#aaa; font-size:28px; font-weight:bold; cursor:pointer;">&times;</span>
+            </div>
+            <form id="newProductForm">
                 <div class="form-group">
                     <label for="modalName">Nombre:</label>
                     <input type="text" id="modalName" name="name" required />
@@ -109,35 +100,25 @@
                     <label for="modalBarcode">Código de Barras:</label>
                     <input type="text" id="modalBarcode" name="barcode" />
                 </div>
-                <div class="form-group">
-                    <label for="modalImageUrl">URL de Imagen:</label>
-                    <input type="text" id="modalImageUrl" name="imageUrl" />
+                <div style="border-top:1px solid #eee; padding-top:15px; margin-top:20px; text-align:right;">
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                    <button type="button" class="btn btn-secondary" id="cancelNewProductBtn" style="margin-left:8px;">Cancelar</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Guardar Producto</button>
-                <button type="button" class="btn close-button-footer">Cancelar</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<script th:inline="javascript">
+    <script th:inline="javascript">
     /*<![CDATA[*/
-
     document.addEventListener('DOMContentLoaded', function() {
-        const purchaseDetailsRows = document.getElementById('purchase-details-rows');
-        const productSearchInput = document.getElementById('productSearchInput'); // Renamed
-        const productSuggestionsDiv = productSearchInput.nextElementSibling; // Renamed
+        const purchaseDetailsRows   = document.getElementById('purchase-details-rows');
+        const productSearchInput    = document.getElementById('productSearchInput');
+        const productSuggestionsDiv = productSearchInput.nextElementSibling;
         const openNewProductModalBtn = document.getElementById('openNewProductModalBtn');
+        const newProductModal       = document.getElementById('newProductModal');
+        const newProductForm        = document.getElementById('newProductForm');
 
         let productRowCounter = -1;
-
-        // Modal elements
-        const newProductModal = document.getElementById('newProductModal');
-        const closeButton = newProductModal.querySelector('.close-button');
-        const closeButtonFooter = newProductModal.querySelector('.close-button-footer');
-        const newProductForm = document.getElementById('newProductForm');
 
         function closeModal() {
             newProductModal.style.display = 'none';
@@ -145,59 +126,29 @@
             openNewProductModalBtn.disabled = true;
         }
 
-        openNewProductModalBtn.addEventListener('click', function() {
-            newProductModal.style.display = 'block';
-            const modalCategorySelect = document.getElementById('modalCategory');
-            const modalSupplierSelect = document.getElementById('modalSupplier');
-            const modalUnitSelect = document.getElementById('modalUnit');
-
-            modalCategorySelect.innerHTML = '<option value="">Seleccione una categoría</option>';
-            modalSupplierSelect.innerHTML = '<option value="">Seleccione un proveedor</option>';
-            modalUnitSelect.innerHTML = '<option value="">Seleccione una unidad</option>';
-
-            /*[# th:each="cat : ${categories}"]*/
-            modalCategorySelect.options[modalCategorySelect.options.length] = new Option(/*[[${cat.name}]]*/ 'Category Name', /*[[${cat.id}]]*/ '1');
-            /*[/]*/
-
-            /*[# th:each="sup : ${suppliers}"]*/
-            modalSupplierSelect.options[modalSupplierSelect.options.length] = new Option(/*[[${sup.name}]]*/ 'Supplier Name', /*[[${sup.id}]]*/ '1');
-            /*[/]*/
-
-            /*[# th:each="uom : ${unitsOfMeasure}"]*/
-            modalUnitSelect.options[modalUnitSelect.options.length] = new Option(/*[[${uom.name}]]*/ 'Unit Name', /*[[${uom.id}]]*/ '1');
-            /*[/]*/
+        document.getElementById('closeNewProductModal').addEventListener('click', closeModal);
+        document.getElementById('cancelNewProductBtn').addEventListener('click', closeModal);
+        window.addEventListener('click', function(e) {
+            if (e.target === newProductModal) closeModal();
         });
 
-        closeButton.addEventListener('click', closeModal);
-        closeButtonFooter.addEventListener('click', closeModal);
-
-        window.addEventListener('click', function(event) {
-            if (event.target == newProductModal) {
-                closeModal();
-            }
+        openNewProductModalBtn.addEventListener('click', function() {
+            newProductModal.style.display = 'block';
         });
 
         newProductForm.addEventListener('submit', function(event) {
             event.preventDefault();
-
             const formData = new FormData(newProductForm);
             const productData = {};
-            formData.forEach((value, key) => {
-                productData[key] = value;
-            });
+            formData.forEach((value, key) => { productData[key] = value; });
 
             fetch('/products/new', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify(productData)
             })
             .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
+                if (!response.ok) return response.json().then(err => { throw err; });
                 return response.json();
             })
             .then(newProduct => {
@@ -247,7 +198,6 @@
                     existingRow = row;
                 }
             });
-
             if (existingRow) {
                 const quantityInput = existingRow.querySelector('input[name$=".quantity"]');
                 quantityInput.value = parseFloat(quantityInput.value) + 1;
@@ -259,96 +209,73 @@
         }
 
         function attachEventListenersToProductRow(row) {
-            const removeButton = row.querySelector('.btn-remove-product');
-            const quantityInput = row.querySelector('input[name$=".quantity"]');
+            const removeButton    = row.querySelector('.btn-remove-product');
+            const quantityInput   = row.querySelector('input[name$=".quantity"]');
             const productPriceInput = row.querySelector('input[name$=".price"]');
-            const productStock = parseFloat(quantityInput.dataset.stock); // Get stock from data attribute
+            const productStock    = parseFloat(quantityInput.dataset.stock);
 
             removeButton.addEventListener('click', function() {
                 row.remove();
                 updateTotal();
             });
 
-            // Combined input listener for quantity validation and updates
             quantityInput.addEventListener('input', function() {
-                let value = this.value;
-
-                // Clean input to allow only non-negative integers
-                value = value.replace(/\D/g, '');
-
+                let value = this.value.replace(/\D/g, '');
                 let newQuantity = parseInt(value, 10);
-
-                // If input is empty or not a valid number, treat as 0
                 if (isNaN(newQuantity)) {
                     newQuantity = 0;
-                    this.value = ''; // Keep input empty
+                    this.value = '';
                 } else {
-                    // Check against stock (for purchase, this is more of a warning/cap, not strict stock)
-                    // The user's request was to cap at stock, so we'll apply that.
-                    if (newQuantity > productStock) {
-                        newQuantity = productStock;
-                    }
-                    // Update input value to reflect cleaned/capped number.
+                    if (newQuantity > productStock) newQuantity = productStock;
                     this.value = newQuantity;
                 }
-                
-                // Handle case where input becomes empty/zero
-                if (newQuantity === 0) {
-                     this.value = '';
-                }
-
-                // No need to update saleItems array directly here, as updateTotal will read from input fields
-                updateTotal(); // Recalculate total after quantity change
+                if (newQuantity === 0) this.value = '';
+                updateTotal();
             });
 
             productPriceInput.addEventListener('input', updateTotal);
         }
 
         let debounceTimer;
-        productSearchInput.addEventListener('input', function() { // Changed to productSearchInput
+        productSearchInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
-            const searchTerm = this.value.trim(); // Trim whitespace
+            const searchTerm = this.value.trim();
             if (searchTerm.length < 2) {
                 productSuggestionsDiv.innerHTML = '';
                 openNewProductModalBtn.disabled = true;
                 return;
             }
-
             debounceTimer = setTimeout(() => {
-                const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/; // EAN-like barcode patterns
-                let url = `/products/search?`;
-                const isBarcodeSearch = eanRegex.test(searchTerm); // Flag to know if it was a barcode search
+                const eanRegex = /^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/;
+                const isBarcodeSearch = eanRegex.test(searchTerm);
+                const params = new URLSearchParams(isBarcodeSearch
+                    ? { barcode: searchTerm }
+                    : { searchTerm: searchTerm });
 
-                if (isBarcodeSearch) {
-                    url += `barcode=${searchTerm}`;
-                } else {
-                    url += `searchTerm=${searchTerm}`;
-                }
-
-                fetch(url)
-                    .then(response => response.json())
-                    .then(products => {
+                fetch('/products/search?' + params)
+                    .then(res => res.json())
+                    .then(data => {
+                        const products = data.content;
                         productSuggestionsDiv.innerHTML = '';
                         if (products.length > 0) {
-                            if (isBarcodeSearch) { // If it's a barcode search and at least one product is found, add the first one directly
+                            if (isBarcodeSearch) {
                                 addProductToPurchase(products[0]);
-                                productSearchInput.value = ''; // Clear input
-                                productSuggestionsDiv.innerHTML = ''; // Clear suggestions
-                                productSearchInput.focus(); // Keep focus for next scan
+                                productSearchInput.value = '';
+                                productSuggestionsDiv.innerHTML = '';
+                                productSearchInput.focus();
                             } else {
-                                // Otherwise (name search), display suggestions as usual
                                 products.forEach(product => {
-                                    const suggestionItem = document.createElement('div');
-                                    suggestionItem.classList.add('suggestion-item');
-                                    suggestionItem.textContent = `${product.name} - Stock: ${product.stock}`; // Added stock to suggestion
-                                    suggestionItem.dataset.productId = product.id;
-                                    suggestionItem.addEventListener('click', function() {
+                                    const item = document.createElement('div');
+                                    item.classList.add('suggestion-item');
+                                    item.textContent = `${product.name} - Stock: ${product.stock}`;
+                                    item.dataset.productId = product.id;
+                                    item.addEventListener('click', function() {
                                         addProductToPurchase(product);
                                         productSearchInput.value = '';
                                         productSuggestionsDiv.innerHTML = '';
                                         openNewProductModalBtn.disabled = true;
                                     });
-                                    productSuggestionsDiv.appendChild(suggestionItem);
+                                    productSuggestionsDiv.appendChild(item);
                                 });
                             }
                             openNewProductModalBtn.disabled = true;
@@ -365,19 +292,15 @@
             }, 300);
         });
 
-        productSearchInput.addEventListener('blur', function() { // Changed to productSearchInput
-            setTimeout(() => {
-                productSuggestionsDiv.innerHTML = '';
-            }, 200);
+        productSearchInput.addEventListener('blur', function() {
+            setTimeout(() => { productSuggestionsDiv.innerHTML = ''; }, 200);
         });
-
-        // Removed mainBarcodeInput.addEventListener('change', ...)
 
         function updateTotal() {
             let grandTotal = 0;
             purchaseDetailsRows.querySelectorAll('.product-row').forEach(row => {
                 const quantity = parseFloat(row.querySelector('input[name$=".quantity"]').value) || 0;
-                const price = parseFloat(row.querySelector('input[name$=".price"]').value) || 0;
+                const price    = parseFloat(row.querySelector('input[name$=".price"]').value) || 0;
                 grandTotal += (quantity * price);
             });
             document.getElementById('total').value = grandTotal.toFixed(2);
@@ -385,8 +308,9 @@
 
         updateTotal();
     });
-
     /*]]>*/
-</script>
+    </script>
+</div>
+
 </body>
 </html>
