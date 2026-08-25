@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.http.ResponseEntity
+import org.springframework.http.HttpStatus
 import org.springframework.web.multipart.MultipartFile // Added
 import java.nio.file.Files // Added
 import java.nio.file.Path // Added
@@ -28,6 +29,7 @@ import com.panificadora.isra.ptvisr.dtos.ProductFormDto
 import com.panificadora.isra.ptvisr.dtos.toDto
 import com.panificadora.isra.ptvisr.dtos.toEntity
 import com.panificadora.isra.ptvisr.dtos.toFormDto
+import org.slf4j.LoggerFactory
 
 @Controller
 @RequestMapping("/products")
@@ -37,6 +39,7 @@ class ProductController(
     private val supplierRepository: SupplierRepository,
     private val unitOfMeasureRepository: UnitOfMeasureRepository
 ) {
+    private val logger = LoggerFactory.getLogger(ProductController::class.java)
 
     // Shows the product list page (initial load, data is fetched via AJAX)
     @GetMapping
@@ -186,63 +189,116 @@ class ProductController(
 
         val MAX_FILE_SIZE = 10 * 1024 * 1024L // 10 MB
 
-        try {
-            if (productForm.name.isBlank()) {
-                model.addAttribute("errorMessage", "Proporcione nombre de producto")
-                populateModelForErrors()
-                return "layout :: mainPage(page='product_form_create', fragment='content')"
-            }
-            if (productForm.price <= 0) {
-                model.addAttribute("errorMessage", "Precio de venta debe ser mayor a 0")
-                populateModelForErrors()
-                return "layout :: mainPage(page='product_form_create', fragment='content')"
-            }
-            if (file != null && !file.isEmpty && file.size > MAX_FILE_SIZE) {
-                val fileSizeMB = String.format("%.2f", file.size / (1024.0 * 1024.0))
-                model.addAttribute("errorMessage", "El archivo ($fileSizeMB MB) excede el tamaño máximo permitido de 10 MB.")
-                populateModelForErrors()
-                return "layout :: mainPage(page='product_form_create', fragment='content')"
-            }
-        } catch (e: Exception) {
-            model.addAttribute("errorMessage", "Error validando archivo: ${e.message}")
-            populateModelForErrors()
-            return "layout :: mainPage(page='product_form_create', fragment='content')"
+        // DEBUG: Log file information
+        logger.info("=== ACTUALIZAR PRODUCTO ID: $id ===")
+        logger.info("Archivo recibido: $file")
+        logger.info("  - isNull: ${file == null}")
+        logger.info("  - isEmpty: ${file?.isEmpty}")
+        if (file != null) {
+            logger.info("  - OriginalFilename: ${file.originalFilename}")
+            logger.info("  - ContentType: ${file.contentType}")
+            logger.info("  - Tamaño real: ${file.size} bytes")
+            logger.info("  - Tamaño en MB: ${String.format("%.2f", file.size / (1024.0 * 1024.0))} MB")
         }
+        logger.info("MAX_FILE_SIZE configurado: $MAX_FILE_SIZE bytes (${String.format("%.2f", MAX_FILE_SIZE / (1024.0 * 1024.0))} MB)")
 
-        try {
-            val existing = productRepository.findById(id)
-                .orElseThrow { IllegalArgumentException("Producto no encontrado: $id") }
-            val category     = productForm.categoryId?.let { categoryRepository.findById(it).orElse(null) }
-            val supplier     = productForm.supplierId?.let { supplierRepository.findById(it).orElse(null) }
-            val unitOfMeasure = productForm.unitId?.let { unitOfMeasureRepository.findById(it).orElse(null) }
+        // try {
+        //     if (productForm.name.isBlank()) {
+        //         logger.warn("Validación fallida: nombre vacío")
+        //         model.addAttribute("errorMessage", "Proporcione nombre de producto")
+        //         populateModelForErrors()
+        //         return "layout :: mainPage(page='product_form_create', fragment='content')"
+        //     }
+        //     if (productForm.price <= 0) {
+        //         logger.warn("Validación fallida: precio <= 0 (${productForm.price})")
+        //         model.addAttribute("errorMessage", "Precio de venta debe ser mayor a 0")
+        //         populateModelForErrors()
+        //         return "layout :: mainPage(page='product_form_create', fragment='content')"
+        //     }
+        //     if (file != null && !file.isEmpty) {
+        //         logger.info("Validando tamaño del archivo...")
+        //         logger.info("  - file.size (${ file.size }) > MAX_FILE_SIZE ($MAX_FILE_SIZE)? ${file.size > MAX_FILE_SIZE}")
+        //         if (file.size > MAX_FILE_SIZE) {
+        //             val fileSizeMB = String.format("%.2f", file.size / (1024.0 * 1024.0))
+        //             logger.warn("Archivo rechazado por tamaño: $fileSizeMB MB")
+        //             model.addAttribute("errorMessage", "El archivo ($fileSizeMB MB) excede el tamaño máximo permitido de 10 MB.")
+        //             populateModelForErrors()
+        //             return "layout :: mainPage(page='product_form_create', fragment='content')"
+        //         }
+        //         logger.info("✓ Validación de tamaño pasada")
+        //     }
+        // } catch (e: Exception) {
+        //     logger.error("Error durante validación: ${e.message}", e)
+        //     model.addAttribute("errorMessage", "Error validando archivo: ${e.message}")
+        //     populateModelForErrors()
+        //     return "layout :: mainPage(page='product_form_create', fragment='content')"
+        // }
 
-            var updatedProduct = productForm.toEntity(category, supplier, unitOfMeasure)
-                .copy(id = id, imageUrl = existing.imageUrl)
+        // try {
+        //     val existing = productRepository.findById(id)
+        //         .orElseThrow { IllegalArgumentException("Producto no encontrado: $id") }
+        //     val category     = productForm.categoryId?.let { categoryRepository.findById(it).orElse(null) }
+        //     val supplier     = productForm.supplierId?.let { supplierRepository.findById(it).orElse(null) }
+        //     val unitOfMeasure = productForm.unitId?.let { unitOfMeasureRepository.findById(it).orElse(null) }
 
-            if (file != null && !file.isEmpty) {
-                val categoryName = category?.name?.replace(Regex("[^a-zA-Z0-9]"), "") ?: "sin_categoria"
-                val skuPart      = (productForm.sku ?: "").replace(Regex("[^a-zA-Z0-9]"), "").takeIf { it.isNotEmpty() } ?: "nsku"
-                val ext          = (file.originalFilename ?: "image").substringAfterLast('.', "")
-                val fileName     = "${id}_${categoryName}_${skuPart}.${ext}"
-                val uploadPath   = Path("C:/ptv/images/")
+        //     var updatedProduct = productForm.toEntity(category, supplier, unitOfMeasure)
+        //         .copy(id = id, imageUrl = existing.imageUrl)
 
-                if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath)
-                file.transferTo(uploadPath.resolve(fileName))
-                updatedProduct = updatedProduct.copy(imageUrl = "/images/$fileName")
-            }
+        //     if (file != null && !file.isEmpty) {
+        //         val categoryName = category?.name?.replace(Regex("[^a-zA-Z0-9]"), "") ?: "sin_categoria"
+        //         val skuPart      = (productForm.sku ?: "").replace(Regex("[^a-zA-Z0-9]"), "").takeIf { it.isNotEmpty() } ?: "nsku"
+        //         val ext          = (file.originalFilename ?: "image").substringAfterLast('.', "")
+        //         val fileName     = "${id}_${categoryName}_${skuPart}.${ext}"
+        //         val uploadPath   = Path("C:/ptv/images/")
 
-            productRepository.save(updatedProduct)
-            return "redirect:/inventory/products"
-        } catch (e: Exception) {
-            model.addAttribute("errorMessage", "Error al actualizar el producto: ${e.message}")
-            populateModelForErrors()
-            return "layout :: mainPage(page='product_form_create', fragment='content')"
-        }
+        //         if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath)
+        //         file.transferTo(uploadPath.resolve(fileName))
+        //         updatedProduct = updatedProduct.copy(imageUrl = "/images/$fileName")
+        //     }
+
+        //     productRepository.save(updatedProduct)
+        //     return "redirect:/inventory/products"
+        // } catch (e: Exception) {
+        //     model.addAttribute("errorMessage", "Error al actualizar el producto: ${e.message}")
+        //     populateModelForErrors()
+        //     return "layout :: mainPage(page='product_form_create', fragment='content')"
+        // }
+        return "layout :: mainPage(page='product_form_create', fragment='content')"
     }
 
     @PostMapping("/delete/{id}")
     fun deleteProduct(@PathVariable id: Long): String {
         productRepository.deleteById(id)
         return "redirect:/inventory/products"
+    }
+
+    @PostMapping("/update-price/{id}")
+    @ResponseBody
+    fun updateProductPrice(
+        @PathVariable id: Long,
+        @RequestParam newPrice: Double
+    ): ResponseEntity<Map<String, Any>> {
+        return try {
+            val product = productRepository.findById(id)
+                .orElseThrow { IllegalArgumentException("Producto no encontrado: $id") }
+
+            logger.info("Actualizando precio del producto ID: $id de ${product.price} a $newPrice")
+
+            val updatedProduct = product.copy(price = newPrice)
+            productRepository.save(updatedProduct)
+
+            logger.info("✓ Precio actualizado correctamente")
+            ResponseEntity.ok(mapOf(
+                "success" to true,
+                "message" to "Precio actualizado",
+                "newPrice" to newPrice
+            ))
+        } catch (e: Exception) {
+            logger.error("Error al actualizar precio: ${e.message}", e)
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf(
+                "success" to false,
+                "message" to "Error: ${e.message}"
+            ))
+        }
     }
 }

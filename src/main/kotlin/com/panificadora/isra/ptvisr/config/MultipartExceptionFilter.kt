@@ -20,14 +20,17 @@ class MultipartExceptionFilter : OncePerRequestFilter() {
         try {
             filterChain.doFilter(request, response)
         } catch (e: Exception) {
-            if (e.message?.contains("Maximum upload size exceeded", ignoreCase = true) == true ||
-                e.cause?.message?.contains("Maximum upload size exceeded", ignoreCase = true) == true) {
-                logger.warn("Upload size exceeded: ${e.message}", e)
+            val isUploadSizeError = e.message?.contains("Maximum upload size exceeded", ignoreCase = true) == true ||
+                e.cause?.message?.contains("Maximum upload size exceeded", ignoreCase = true) == true ||
+                e.message?.contains("FileCountLimitExceededException", ignoreCase = true) == true ||
+                e.cause?.message?.contains("FileCountLimitExceededException", ignoreCase = true) == true
 
-                // Set response as JSON with 413 status
+            if (isUploadSizeError) {
+                logger.warn("Upload/multipart error [${request.method} ${request.requestURI}]: ${e.message}", e)
+
                 response.status = HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE
                 response.contentType = "application/json; charset=UTF-8"
-                response.writer.write("""{"error":"El archivo es muy grande. El tamaño máximo permitido es 10 MB."}""")
+                response.writer.write("""{"error":"La solicitud multipart excede los límites permitidos. Intenta con menos campos o un archivo más pequeño."}""")
                 response.writer.flush()
                 return
             }
@@ -36,7 +39,7 @@ class MultipartExceptionFilter : OncePerRequestFilter() {
     }
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-        // Only apply to multipart requests
-        return !request.contentType?.contains("multipart/form-data", ignoreCase = true) ?: true
+        val isMultipart = request.contentType?.contains("multipart/form-data", ignoreCase = true) ?: false
+        return !isMultipart
     }
 }

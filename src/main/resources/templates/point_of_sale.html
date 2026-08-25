@@ -67,6 +67,39 @@
         #sale-items-table .quantity-input {
             width: 60px;
         }
+        .btn-edit-price {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-edit-price:hover {
+            background-color: #218838;
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .suggestion-item:hover,
+        .suggestion-item.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .product-suggestions {
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+        }
+        .no-suggestions {
+            padding: 10px;
+            color: #666;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -128,7 +161,7 @@
                         <th>Cantidad</th>
                         <th>Precio</th>
                         <th>Importe</th>
-                        <th>Acción</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -152,6 +185,30 @@
                     <button class="btn btn-primary" id="btn-pay">Cobrar</button>
                     <button class="btn btn-danger" id="btn-cancel">Cancelar Venta</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Price Modal -->
+    <div id="editPriceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Precio</h2>
+                <span class="close-button" id="closeEditPriceModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="summary-item">
+                    <span>Producto:</span>
+                    <span id="editPrice-productName" style="font-weight: bold;"></span>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="editPriceInput">Nuevo Precio de Venta:</label>
+                    <input type="number" id="editPriceInput" class="form-control" step="0.01" min="0.01">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="confirmEditPriceBtn">Actualizar</button>
+                <button class="btn btn-secondary" id="cancelEditPriceBtn">Cancelar</button>
             </div>
         </div>
     </div>
@@ -209,6 +266,19 @@
         const modalChange         = document.getElementById('modal-change');
 
         let saleItems = [];
+        let currentSuggestionIndex = -1;
+        let editingItemIndex = -1;
+
+        // Modal elements
+        const editPriceModal = document.getElementById('editPriceModal');
+        const closeEditPriceModal = document.getElementById('closeEditPriceModal');
+        const cancelEditPriceBtn = document.getElementById('cancelEditPriceBtn');
+        const confirmEditPriceBtn = document.getElementById('confirmEditPriceBtn');
+        const editPriceInput = document.getElementById('editPriceInput');
+        const editPriceProductName = document.getElementById('editPrice-productName');
+
+        // Focus on product search input when page loads
+        productNameInput.focus();
 
         function addProductToSale(product) {
             if (product.stock <= 0) {
@@ -242,9 +312,12 @@
                     <td>${item.name}</td>
                     <td><span class="${stockClass}">${item.stock}</span></td>
                     <td><input type="text" class="quantity-input" value="${item.quantity}"></td>
-                    <td>${item.price.toFixed(2)}</td>
-                    <td>${(item.quantity * item.price).toFixed(2)}</td>
-                    <td><button class="btn btn-remove-item">Eliminar</button></td>
+                    <td>$<span class="item-price">${item.price.toFixed(2)}</span></td>
+                    <td>$<span class="item-total">${(item.quantity * item.price).toFixed(2)}</span></td>
+                    <td>
+                        <button class="btn btn-edit-price" data-index="${index}">Modificar</button>
+                        <button class="btn btn-remove-item">Eliminar</button>
+                    </td>
                 `;
                 saleItemsTbody.appendChild(row);
             });
@@ -264,8 +337,22 @@
         }
 
         let debounceTimer;
+        let currentProducts = [];
+
+        function selectSuggestionByIndex(index) {
+            const items = productSuggestionsDiv.querySelectorAll('.suggestion-item');
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
         productNameInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
+            currentSuggestionIndex = -1;
             const searchTerm = this.value.trim();
             if (searchTerm.length < 2) {
                 productSuggestionsDiv.innerHTML = '';
@@ -282,8 +369,9 @@
                     .then(res => res.json())
                     .then(data => {
                         const products = data.content;
+                        currentProducts = products.filter(p => p.stock > 0);
                         productSuggestionsDiv.innerHTML = '';
-                        if (products.length > 0) {
+                        if (currentProducts.length > 0) {
                             if (isBarcodeSearch) {
                                 if (products[0].stock <= 0) {
                                     alert('Producto sin stock disponible.');
@@ -295,15 +383,17 @@
                                 productNameInput.value = '';
                                 productNameInput.focus();
                             } else {
-                                products.forEach(product => {
-                                    if (product.stock <= 0) return;
+                                currentProducts.forEach((product, idx) => {
                                     const item = document.createElement('div');
                                     item.classList.add('suggestion-item');
-                                    item.textContent = `${product.name} - ${product.price.toFixed(2)}`;
+                                    item.dataset.index = idx;
+                                    item.textContent = `${product.name} - $${product.price.toFixed(2)}`;
                                     item.addEventListener('click', function() {
                                         addProductToSale(product);
                                         productNameInput.value = '';
                                         productSuggestionsDiv.innerHTML = '';
+                                        currentProducts = [];
+                                        currentSuggestionIndex = -1;
                                         productNameInput.focus();
                                     });
                                     productSuggestionsDiv.appendChild(item);
@@ -320,6 +410,39 @@
             }, 300);
         });
 
+        // Navigate suggestions with arrow keys
+        productNameInput.addEventListener('keydown', function(e) {
+            const items = productSuggestionsDiv.querySelectorAll('.suggestion-item');
+            const itemCount = items.length;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (itemCount === 0) return;
+                currentSuggestionIndex = Math.min(currentSuggestionIndex + 1, itemCount - 1);
+                selectSuggestionByIndex(currentSuggestionIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (itemCount === 0) return;
+                currentSuggestionIndex = Math.max(currentSuggestionIndex - 1, -1);
+                if (currentSuggestionIndex >= 0) {
+                    selectSuggestionByIndex(currentSuggestionIndex);
+                } else {
+                    items.forEach(item => item.classList.remove('selected'));
+                }
+            } else if (e.key === 'Enter' && currentSuggestionIndex >= 0) {
+                e.preventDefault();
+                const selectedProduct = currentProducts[currentSuggestionIndex];
+                if (selectedProduct) {
+                    addProductToSale(selectedProduct);
+                    productNameInput.value = '';
+                    productSuggestionsDiv.innerHTML = '';
+                    currentProducts = [];
+                    currentSuggestionIndex = -1;
+                    productNameInput.focus();
+                }
+            }
+        });
+
         productNameInput.addEventListener('blur', function() {
             setTimeout(() => { productSuggestionsDiv.innerHTML = ''; }, 200);
         });
@@ -330,8 +453,24 @@
                 saleItems.splice(rowIndex, 1);
                 renderSaleItems();
                 updateSummary();
+            } else if (e.target.classList.contains('btn-edit-price')) {
+                const rowIndex = parseInt(e.target.dataset.index);
+                const item = saleItems[rowIndex];
+                editingItemIndex = rowIndex;
+                editPriceProductName.textContent = item.name;
+                editPriceInput.value = item.price.toFixed(2);
+                editPriceModal.style.display = 'block';
+                editPriceInput.focus();
+                editPriceInput.select();
             }
         });
+
+        saleItemsTbody.addEventListener('focus', function(e) {
+            if (e.target.classList.contains('quantity-input')) {
+                // Select all text when input gets focus for easy replacement
+                setTimeout(() => e.target.select(), 0);
+            }
+        }, true);
 
         saleItemsTbody.addEventListener('input', function(e) {
             if (e.target.classList.contains('quantity-input')) {
@@ -367,15 +506,67 @@
             const currentTotal    = parseFloat(summaryTotal.textContent.replace('$', ''));
             modalSubtotal.textContent = `$${currentSubtotal.toFixed(2)}`;
             modalTotal.textContent    = `$${currentTotal.toFixed(2)}`;
-            amountReceivedInput.value = currentTotal.toFixed(2);
+            amountReceivedInput.value = '';
             updateChange();
             paymentModal.style.display = 'block';
             amountReceivedInput.focus();
         });
 
+        // Edit Price Modal handlers
+        closeEditPriceModal.addEventListener('click', function() { editPriceModal.style.display = 'none'; });
+        cancelEditPriceBtn.addEventListener('click',  function() { editPriceModal.style.display = 'none'; });
+        confirmEditPriceBtn.addEventListener('click', async function() {
+            const newPrice = parseFloat(editPriceInput.value) || 0;
+            if (newPrice <= 0) {
+                alert('El precio debe ser mayor a 0');
+                return;
+            }
+            if (editingItemIndex >= 0 && editingItemIndex < saleItems.length) {
+                const item = saleItems[editingItemIndex];
+                const productId = item.id;
+
+                // Update price in database
+                try {
+                    const response = await fetch(`/products/update-price/${productId}?newPrice=${newPrice}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            item.price = newPrice;
+                            renderSaleItems();
+                            updateSummary();
+                            editPriceModal.style.display = 'none';
+                            productNameInput.focus();
+                            console.log('Precio actualizado en BD correctamente');
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    } else {
+                        alert('Error al actualizar el precio en el servidor');
+                    }
+                } catch (error) {
+                    console.error('Error al actualizar precio:', error);
+                    alert('Error de conexión: ' + error.message);
+                }
+            }
+        });
+        editPriceInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmEditPriceBtn.click();
+            }
+        });
+
         closePaymentModal.addEventListener('click',  function() { paymentModal.style.display = 'none'; });
         cancelPaymentBtn.addEventListener('click',   function() { paymentModal.style.display = 'none'; });
         amountReceivedInput.addEventListener('input', updateChange);
+        amountReceivedInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmSaleBtn.click();
+            }
+        });
 
         function updateChange() {
             const totalToPay     = parseFloat(modalTotal.textContent.replace('$', ''));
@@ -409,6 +600,7 @@
                     alert(`Venta registrada con éxito! ID de Venta: ${sale.id}`);
                     paymentModal.style.display = 'none';
                     clearSale();
+                    productNameInput.focus();
                 } else {
                     const errorData = await response.json();
                     alert(`Error al registrar la venta: ${errorData.message || response.statusText}`);
