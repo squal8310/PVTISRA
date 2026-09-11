@@ -60,11 +60,9 @@
                     <li class="nav-category">Reportes</li>
                     <li><a href="/reports" class="nav-item"><i class="bi bi-graph-up"></i> Ver Reportes</a></li>
                     <li>
-                        <form th:action="@{/logout}" method="post" style="display: block;">
-                            <button type="submit" class="nav-item logout-button">
-                                <i class="bi bi-box-arrow-right"></i> Salir
-                            </button>
-                        </form>
+                        <a href="/logout" class="nav-item logout-button">
+                            <i class="bi bi-box-arrow-right"></i> Salir
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -81,6 +79,23 @@
                 button.addEventListener('click', function() {
                     this.closest('.alert').remove();
                 });
+            });
+
+            // Verificar autenticación
+            fetch('/api/mobile/dashboard', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // No autenticado, redirigir a login
+                    window.location.href = '/login';
+                }
+            })
+            .catch(error => {
+                // Error de conexión, redirigir a login
+                console.log('Error verificando autenticación:', error);
+                window.location.href = '/login';
             });
         });
     </script>

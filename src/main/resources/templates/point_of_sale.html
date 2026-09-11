@@ -447,6 +447,14 @@
             setTimeout(() => { productSuggestionsDiv.innerHTML = ''; }, 200);
         });
 
+        // Tab key to go to Pay button
+        productNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                btnPay.focus();
+            }
+        });
+
         saleItemsTbody.addEventListener('click', function(e) {
             if (e.target.classList.contains('btn-remove-item')) {
                 const rowIndex = e.target.closest('tr').dataset.index;

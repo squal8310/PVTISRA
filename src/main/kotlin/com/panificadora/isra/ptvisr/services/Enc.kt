@@ -8,5 +8,5 @@ class Enc {
         val passwordEncoder = BCryptPasswordEncoder()
         val myPassword = "test123" // Cambia esto por la
         println("Contraseña encriptada para '$myPassword': ${passwordEncoder.encode(myPassword)}")
-        7     }
+             }
 }

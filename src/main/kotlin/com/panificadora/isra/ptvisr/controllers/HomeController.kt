@@ -18,6 +18,11 @@ class HomeController {
         return "layout :: mainPage(page='dashboard', fragment='content')"
     }
 
+    @GetMapping("/unauthorized")
+    fun unauthorized(): String {
+        return "redirect:/login"
+    }
+
     @GetMapping("/pos")
     fun pointOfSale(): String {
         return "layout :: mainPage(page='point_of_sale', fragment='content')"
